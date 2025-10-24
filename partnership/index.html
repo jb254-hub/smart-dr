@@ -1,1 +1,543 @@
-<a href=""></a>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Partner With Us - Smart Doctor GenZ</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #2a7de1;
+            --primary-dark: #1c5fb3;
+            --secondary: #00c6ab;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .hero {
+            padding: 80px 0;
+            text-align: center;
+            background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), 
+                        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%232a7de1" opacity="0.05"/></svg>');
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .logo i {
+            font-size: 2.2rem;
+        }
+
+        .hero h1 {
+            font-size: 2.8rem;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto 30px;
+            color: var(--gray);
+        }
+        .partnership-types {
+            padding: 80px 0;
+            background-color: white;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .section-title h2 {
+            font-size: 2.2rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .section-title p {
+            color: var(--gray);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .partnership-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .partnership-card {
+            background-color: var(--light);
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-align: center;
+            border-top: 4px solid var(--primary);
+        }
+
+        .partnership-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .partnership-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            font-size: 1.8rem;
+        }
+
+        .partnership-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+
+        .partnership-card p {
+            color: var(--gray);
+            margin-bottom: 20px;
+        }
+
+        .benefits-list {
+            text-align: left;
+            margin: 20px 0;
+        }
+
+        .benefits-list li {
+            margin-bottom: 10px;
+            color: var(--gray);
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .benefits-list i {
+            color: var(--secondary);
+            margin-right: 10px;
+            margin-top: 5px;
+        }
+
+        .why-partner {
+            padding: 80px 0;
+            background-color: var(--light);
+        }
+
+        .why-content {
+            display: flex;
+            align-items: center;
+            gap: 50px;
+        }
+
+        .why-text {
+            flex: 1;
+        }
+
+        .why-text h2 {
+            font-size: 2.2rem;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .why-text p {
+            margin-bottom: 20px;
+            color: var(--gray);
+        }
+
+        .why-image {
+            flex: 1;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .why-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .testimonials {
+            padding: 80px 0;
+            background-color: white;
+        }
+
+        .testimonial-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .testimonial-card {
+            background-color: var(--light);
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+
+        .testimonial-card:before {
+            font-size: 5rem;
+            color: var(--light-gray);
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-family: Georgia, serif;
+            line-height: 1;
+        }
+
+        .testimonial-text {
+            font-style: italic;
+            margin-bottom: 20px;
+            color: var(--gray);
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+        }
+
+        .author-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .author-info h4 {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .author-info p {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .cta-section {
+            padding: 80px 0;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            text-align: center;
+        }
+
+        .cta-section h2 {
+            font-size: 2.2rem;
+            margin-bottom: 20px;
+        }
+
+        .cta-section p {
+            font-size: 1.1rem;
+            max-width: 700px;
+            margin: 0 auto 30px;
+            opacity: 0.9;
+        }
+
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background-color: white;
+            color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--light-gray);
+            transform: translateY(-3px);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-secondary:hover {
+            background-color: white;
+            color: var(--primary);
+            transform: translateY(-3px);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .why-content {
+                flex-direction: column;
+            }
+            
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            
+            .section-title h2 {
+                font-size: 1.8rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero {
+                padding: 60px 0;
+            }
+            
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+            
+            .partnership-types, .why-partner, .testimonials, .cta-section {
+                padding: 60px 0;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .hero h1 {
+                font-size: 1.6rem;
+            }
+            
+            .section-title h2 {
+                font-size: 1.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <section class="hero">
+        <div class="container">
+            <div class="logo">
+                <i class=""></i>
+                <span>Smart Doctor GenZ</span>
+            </div>
+            <h1>Partner With Smart Doctor GenZ</h1>
+            <p>Join us in revolutionizing healthcare accessibility through innovative AI technology and collaborative partnerships.</p>
+        </div>
+    </section>
+
+    <section class="partnership-types">
+        <div class="container">
+            <div class="section-title">
+                <h2>Partnership Opportunities</h2>
+                <p>We offer various partnership models to suit different organizations and goals</p>
+            </div>
+            <div class="partnership-grid">
+                <div class="partnership-card">
+                    <div class="partnership-icon">
+                        <i class="fas fa-hospital"></i>
+                    </div>
+                    <h3>Healthcare Providers</h3>
+                    <p>Integrate our AI technology into your practice to enhance patient care and streamline operations.</p>
+                    <ul class="benefits-list">
+                        <li><i class="fas fa-check"></i> Enhanced diagnostic capabilities</li>
+                        <li><i class="fas fa-check"></i> Reduced administrative burden</li>
+                        <li><i class="fas fa-check"></i> Improved patient engagement</li>
+                        <li><i class="fas fa-check"></i> Access to advanced analytics</li>
+                    </ul>
+                </div>
+                <div class="partnership-card">
+                    <div class="partnership-icon">
+                        <i class="fas fa-briefcase-medical"></i>
+                    </div>
+                    <h3>Pharmaceutical Companies</h3>
+                    <p>Collaborate on research, clinical trials, and patient education initiatives.</p>
+                    <ul class="benefits-list">
+                        <li><i class="fas fa-check"></i> Access to anonymized health data</li>
+                        <li><i class="fas fa-check"></i> Patient recruitment for trials</li>
+                        <li><i class="fas fa-check"></i> Drug adherence monitoring</li>
+                        <li><i class="fas fa-check"></i> Educational content distribution</li>
+                    </ul>
+                </div>
+                <div class="partnership-card">
+                    <div class="partnership-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3>Technology Partners</h3>
+                    <p>Integrate our AI capabilities into your platforms or co-develop new solutions.</p>
+                    <ul class="benefits-list">
+                        <li><i class="fas fa-check"></i> API access to our AI engine</li>
+                        <li><i class="fas fa-check"></i> Co-branding opportunities</li>
+                        <li><i class="fas fa-check"></i> Joint product development</li>
+                        <li><i class="fas fa-check"></i> Revenue sharing models</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="why-partner">
+        <div class="container">
+            <div class="why-content">
+                <div class="why-text">
+                    <h2>Why Partner With Us?</h2>
+                    <p>Smart Doctor GenZ is at the forefront of AI-driven healthcare solutions, with a growing user base and proven technology.</p>
+                    <p>Our platform combines medical expertise with cutting-edge artificial intelligence to deliver accurate, accessible health information to users worldwide.</p>
+                    <p>By partnering with us, you'll gain access to our innovative technology, extensive user base, and the opportunity to shape the future of digital healthcare.</p>
+                    <a href="#" class="btn btn-primary">Learn More About Our Technology</a>
+                </div>
+                <div class="why-image">
+                    <div style="width:100%;height:350px;background:linear-gradient(135deg, #2a7de1, #00c6ab);display:flex;align-items:center;justify-content:center;color:white;font-size:1.2rem;">
+                        <i class="fas fa-handshake" style="font-size:4rem;margin-right:20px;"></i>
+                        <div>Partnership Success</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="testimonials">
+        <div class="container">
+            <div class="section-title">
+                <h2>What Our Partners Say</h2>
+                <p>Hear from organizations that have successfully partnered with Smart Doctor GenZ</p>
+            </div>
+            <div class="testimonial-grid">
+                <div class="testimonial-card">
+                    <div class="testimonial-text">
+                        "Partnering with Smart Doctor GenZ has transformed how we deliver care to our patients. Their AI technology has improved our diagnostic accuracy and patient satisfaction significantly."
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">JD</div>
+                        <div class="author-info">
+                            <h4>Dr. Jennifer Davis</h4>
+                            <p>Medical Director, City General Hospital</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-text">
+                        "The integration of Smart Doctor GenZ's API into our health app was seamless. Our users now have access to reliable health information, and we've seen a 40% increase in engagement."
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">MR</div>
+                        <div class="author-info">
+                            <h4>Michael Roberts</h4>
+                            <p>CEO, HealthTech Solutions</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-text">
+                        "Our collaboration with Smart Doctor GenZ on patient education has been outstanding. Their platform allows us to reach patients with accurate information about our medications."
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">SW</div>
+                        <div class="author-info">
+                            <h4>Sarah Wilson</h4>
+                            <p>Partnership Director, PharmaCorp</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <div class="container">
+            <h2>Ready to Transform Healthcare Together?</h2>
+            <p>Join our network of partners and help us make quality healthcare accessible to everyone.</p>
+            <div class="cta-buttons">
+                <a href="#" class="btn btn-primary">Contact Us For Partnership</a>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const partnershipCards = document.querySelectorAll('.partnership-card');
+            const testimonialCards = document.querySelectorAll('.testimonial-card');
+            
+            function checkScroll() {
+                partnershipCards.forEach(card => {
+                    const cardTop = card.getBoundingClientRect().top;
+                    const windowHeight = window.innerHeight;
+                    
+                    if (cardTop < windowHeight - 100) {
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }
+                });
+                
+                testimonialCards.forEach(card => {
+                    const cardTop = card.getBoundingClientRect().top;
+                    const windowHeight = window.innerHeight;
+                    
+                    if (cardTop < windowHeight - 100) {
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }
+                });
+            }
+            partnershipCards.forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'opacity 0.5s, transform 0.5s';
+            });
+            
+            testimonialCards.forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'opacity 0.5s, transform 0.5s';
+            });
+            
+            window.addEventListener('scroll', checkScroll);
+            checkScroll(); 
+        });
+    </script>
+</body>
+</html>
