@@ -1,1 +1,457 @@
-a
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - Smart Doctor GenZ</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #2a7de1;
+            --primary-dark: #1c5fb3;
+            --secondary: #00c6ab;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        .hero {
+            padding: 80px 0;
+            text-align: center;
+            background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), 
+                        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%232a7de1" opacity="0.05"/></svg>');
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .logo i {
+            font-size: 2.2rem;
+        }
+
+        .hero h1 {
+            font-size: 2.8rem;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto 30px;
+            color: var(--gray);
+        }
+
+        .contact-section {
+            padding: 80px 0;
+            background-color: white;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .section-title h2 {
+            font-size: 2.2rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .section-title p {
+            color: var(--gray);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .contact-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .contact-method {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            padding: 30px;
+            background-color: var(--light);
+            border-radius: 10px;
+            transition: all 0.3s;
+            border-left: 4px solid var(--primary);
+            height: 100%;
+        }
+
+        .contact-method:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .method-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.8rem;
+            flex-shrink: 0;
+        }
+
+        .method-details h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+
+        .method-details p {
+            color: var(--gray);
+            margin-bottom: 20px;
+        }
+
+        .contact-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            padding: 10px 20px;
+            background-color: white;
+            border-radius: 30px;
+            transition: all 0.3s;
+            border: 2px solid var(--light-gray);
+        }
+
+        .contact-link:hover {
+            background-color: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .faq-section {
+            padding: 80px 0;
+            background-color: var(--light);
+        }
+
+        .faq-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .faq-item {
+            background-color: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .faq-item h3 {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        .faq-item p {
+            color: var(--gray);
+        }
+
+        .cta-section {
+            padding: 80px 0;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            text-align: center;
+        }
+
+        .cta-section h2 {
+            font-size: 2.2rem;
+            margin-bottom: 20px;
+        }
+
+        .cta-section p {
+            font-size: 1.1rem;
+            max-width: 700px;
+            margin: 0 auto 30px;
+            opacity: 0.9;
+        }
+
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background-color: white;
+            color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--light-gray);
+            transform: translateY(-3px);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-secondary:hover {
+            background-color: white;
+            color: var(--primary);
+            transform: translateY(-3px);
+        }
+
+        @media (max-width: 992px) {
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            
+            .section-title h2 {
+                font-size: 1.8rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero {
+                padding: 60px 0;
+            }
+            
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+            
+            .contact-section, .faq-section, .cta-section {
+                padding: 60px 0;
+            }
+            
+            .contact-methods {
+                grid-template-columns: 1fr;
+            }
+            
+            .contact-method {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .method-icon {
+                align-self: center;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .hero h1 {
+                font-size: 1.6rem;
+            }
+            
+            .section-title h2 {
+                font-size: 1.6rem;
+            }
+            
+            .contact-method {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <section class="hero">
+        <div class="container">
+            <div class="logo">
+                <i class=""></i>
+                <span>Smart Doctor GenZ</span>
+            </div>
+            <h1>Contact Us</h1>
+            <p>Get in touch with our team for questions, support, or partnership opportunities.</p>
+        </div>
+    </section>
+
+    <section class="contact-section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Get In Touch</h2>
+                <p>We're here to help you with any questions about our services or technology</p>
+            </div>
+            <div class="contact-methods">
+                <div class="contact-method">
+                    <div class="method-icon">
+                        <i class="fab fa-whatsapp"></i>
+                    </div>
+                    <div class="method-details">
+                        <h3>WhatsApp</h3>
+                        <p>Chat with us directly on WhatsApp for quick responses and instant support.</p>
+                        <a href="https://wa.me/254793855917" class="contact-link" target="_blank">
+                            <i class="fab fa-whatsapp"></i>
+                            Message us on WhatsApp
+                        </a>
+                    </div>
+                </div>
+                <div class="contact-method">
+                    <div class="method-icon">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <div class="method-details">
+                        <h3>Phone Call</h3>
+                        <p>Speak directly with our support team during business hours for personalized assistance.</p>
+                        <a href="tel:0706291909" class="contact-link">
+                            <i class="fas fa-phone"></i>
+                            Call 0706291909
+                        </a>
+                    </div>
+                </div>
+                <div class="contact-method">
+                    <div class="method-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="method-details">
+                        <h3>Email</h3>
+                        <p>Send us an email and we'll respond within 24 hours with detailed information.</p>
+                        <a href="mailto:jackbrian727@gmail.com" class="contact-link">
+                            <i class="fas fa-envelope"></i>
+                            jackbrian727@gmail.com
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="faq-section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Frequently Asked Questions</h2>
+                <p>Quick answers to common questions about our service</p>
+            </div>
+            <div class="faq-grid">
+                <div class="faq-item">
+                    <h3>How does Smart Doctor GenZ work?</h3>
+                    <p>Our AI analyzes your symptoms using advanced medical knowledge to provide personalized health guidance. Simply describe your symptoms and answer a few questions.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>Is my health information private?</h3>
+                    <p>Yes! We don't store any personal health information. Your data is processed temporarily during your session and then permanently deleted.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>What if I have a medical emergency?</h3>
+                    <p>For emergencies, please contact local emergency services immediately. Our AI assistant is designed for non-emergency health guidance only.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>Can I use Smart Doctor without creating an account?</h3>
+                    <p>Absolutely! You can use our service completely anonymously without any registration or account creation.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>How accurate is the medical advice?</h3>
+                    <p>Our AI is trained on verified medical information, but it's not a replacement for professional medical diagnosis. Always consult healthcare professionals for serious conditions.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>Is the service available 24/7?</h3>
+                    <p>Yes! Our AI assistant is available anytime, anywhere to provide health guidance when you need it.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="cta-section">
+        <div class="container">
+            <h2>Ready to Experience Smart Healthcare?</h2>
+            <p>Try Smart Doctor GenZ today and get instant AI-powered health guidance.</p>
+            <div class="cta-buttons">
+                <a href="https://smartdr.online/" class="btn btn-primary">Use Smart Doctor Now</a>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const contactMethods = document.querySelectorAll('.contact-method');
+            const faqItems = document.querySelectorAll('.faq-item');
+            
+            function checkScroll() {
+                contactMethods.forEach(method => {
+                    const methodTop = method.getBoundingClientRect().top;
+                    const windowHeight = window.innerHeight;
+                    
+                    if (methodTop < windowHeight - 100) {
+                        method.style.opacity = '1';
+                        method.style.transform = 'translateY(0)';
+                    }
+                });
+                
+                faqItems.forEach(item => {
+                    const itemTop = item.getBoundingClientRect().top;
+                    const windowHeight = window.innerHeight;
+                    
+                    if (itemTop < windowHeight - 100) {
+                        item.style.opacity = '1';
+                        item.style.transform = 'translateY(0)';
+                    }
+                });
+            }
+            
+            contactMethods.forEach(method => {
+                method.style.opacity = '0';
+                method.style.transform = 'translateY(20px)';
+                method.style.transition = 'opacity 0.5s, transform 0.5s';
+            });
+            
+            faqItems.forEach(item => {
+                item.style.opacity = '0';
+                item.style.transform = 'translateY(20px)';
+                item.style.transition = 'opacity 0.5s, transform 0.5s';
+            });
+            
+            window.addEventListener('scroll', checkScroll);
+            checkScroll(); 
+        });
+    </script>
+</body>
+</html>
