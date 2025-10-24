@@ -413,7 +413,7 @@ function createSystemMessage() {
         You cannot provide medical diagnoses, prescribe treatments, or replace professional medical care.
         
         STRICT TOPIC RESTRICTIONS:
-        - ONLY answer questions related to: health, medicine, diseases, feelings, death, medications, symptoms, medical conditions, 
+        - ONLY answer questions related to: health, guidance, counselling, medicine, diseases, feelings, death, medications, symptoms, medical conditions, 
           emotional well-being, mental health, psychology, lifestyle factors affecting health
         - DO NOT answer questions about: coding, technology, programming, math, science (unless medical science),
           history, politics, entertainment, sports, or any other non-medical topics
@@ -861,7 +861,7 @@ const medicalKeywords = [
         
         // Call Groq API
         const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
-        const API_KEY = "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";
+        const API_KEY = "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";
         
         const response = await fetch(GROQ_API_URL, {
             method: "POST",
