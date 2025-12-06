@@ -861,7 +861,7 @@ const medicalKeywords = [
         
         // Call Groq API
         const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
-        const API_KEY = "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";
+        const API_KEY = "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";
         
         const response = await fetch(GROQ_API_URL, {
             method: "POST",
