@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial‑scale=1.0">
+    <title>Smart Dr. GenZ ‑ AI Smart Doctor</title>
+
+    <link rel="icon" href="https://res.cloudinary.com/devwniw2h/image/upload/v1762241192/Gemini_Generated_Image_3ddoqg3ddoqg3ddo_xulqzq.jpg" type="image/png">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://res.cloudinary.com/devwniw2h/image/upload/v1762241192/Gemini_Generated_Image_3ddoqg3ddoqg3ddo_xulqzq.jpg">
+
+    <meta property="og:title" content="Dr. GenZ ‑ AI Smart Doctor">
+    <meta property="og:description" content="Your AI Smart Doctor — personalized medical guidance and health insights.">
+    <meta property="og:image" content="https://res.cloudinary.com/devwniw2h/image/upload/v1762241192/Gemini_Generated_Image_3ddoqg3ddoqg3ddo_xulqzq.jpg">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://smartdr.online">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="mobile-header">
+        <button class="mobile-menu-btn" id="mobile-menu-btn">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="mobile-title">Dr. GenZ</div>
+        <div style="width: 40px;"></div> 
+    </div>
+    
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    
+    <div class="voice-recording-indicator" id="voice-recording-indicator">
+        <i class="fas fa-microphone"></i>
+        <div>Listening... Speak now</div>
+    </div>
+    
+    <div class="app-container">
+        <div class="welcome-screen" id="welcome-screen">
+            <div class="welcome-content">
+                <h1 class="welcome-title">Dr. GenZ</h1>
+                <p class="welcome-subtitle">Your AI Smart Doctor, ready to provide personalized medical guidance and health insights. Please note: This is an AI assistant, not a replacement for professional medical care.</p>
+                
+                <div class="emergency-notice">
+                    <strong><i class="fas fa-exclamation-triangle"></i> Medical Emergency Notice:</strong> If you're experiencing a medical emergency, please call your local emergency services immediately.
+                </div>
+                
+                <div class="user-info-form" id="user-info-form">
+                    <div class="form-group">
+                        <label for="user-name"><i class="fas fa-user"></i> What's your name?</label>
+                        <input type="text" id="user-name" placeholder="Enter your name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="user-age"><i class="fas fa-calendar-alt"></i> Your Age</label>
+                        <input type="number" id="user-age" placeholder="Enter your age" min="1" max="120">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="user-gender"><i class="fas fa-venus-mars"></i> Gender</label>
+                        <select id="user-gender">
+                            <option value="">Select your gender</option>
+                            <option value="female">Female</option>
+                            <option value="male">Male</option>
+                            <option value="other">Other</option>
+                            <option value="prefer-not-to-say">Prefer not to say</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="user-specialty"><i class="fas fa-stethoscope"></i> Preferred Specialty</label>
+                        <select id="user-specialty">
+                            <option value="general">General Medicine</option>
+                            <option value="pediatrics">Pediatrics</option>
+                            <option value="cardiology">Cardiology</option>
+                            <option value="dermatology">Dermatology</option>
+                            <option value="mental">Mental Health</option>
+                        </select>
+                    </div>
+                    
+                    <button class="start-chat-btn" id="start-chat-btn">
+                        <i class="fas fa-comment-medical"></i> Start Consultation
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">D</div>
+                <div class="sidebar-title">Dr. GenZ</div>
+            </div>
+
+            <div class="sidebar-links">
+                <a href="/about-us/" class="sidebar-link" id="about-us-link" target="_blank">
+                    <i class="fas fa-info-circle"></i>
+                    <span>About Us</span>
+                </a>
+                <a href="/privacy/" class="sidebar-link" id="privacy-link" target="_blank">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Privacy</span>
+                </a>
+                <a href="/contact-us/" class="sidebar-link" id="contact-us-link" target="_blank">
+                    <i class="fas fa-envelope"></i>
+                    <span>Contact Us</span>
+                </a>
+                <a href="/partnership/" class="sidebar-link" id="partnership-link" target="_blank">
+                    <i class="fas fa-handshake"></i>
+                    <span>Partnership</span>
+                </a>
+            </div>
+            
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar">D</div>
+                    <div>
+                        <div style="font-weight: 600;">Dr. GenZ</div>
+                        <div style="font-size: 12px; color: var(--text-muted);">AI Medical Assistant</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="chat-header">
+                <div class="chat-title">
+                    Dr. GenZ
+                    <div class="specialty-indicator" id="specialty-indicator">General Medicine</div>
+                </div>
+                <div class="model-selector">
+                    <label>Specialty:</label>
+                    <select id="model-select">
+                        <option value="general">General Medicine</option>
+                        <option value="pediatrics">Pediatrics</option>
+                        <option value="cardiology">Cardiology</option>
+                        <option value="dermatology">Dermatology</option>
+                        <option value="mental">Mental Health</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="mobile-specialty-selector">
+                <select id="mobile-model-select">
+                    <option value="general">General Medicine</option>
+                    <option value="pediatrics">Pediatrics</option>
+                    <option value="cardiology">Cardiology</option>
+                    <option value="dermatology">Dermatology</option>
+                    <option value="mental">Mental Health</option>
+                </select>
+            </div>
+            
+            <div class="messages-container" id="messages-container">
+            </div>
+            
+            <div class="medical-tools">
+                <button class="tool-btn" id="symptom-checker-btn">
+                    <i class="fas fa-stethoscope"></i>
+                    <span>Symptom Checker</span>
+                </button>
+                <button class="tool-btn" id="health-tracker-btn">
+                    <i class="fas fa-heartbeat"></i>
+                    <span>Health Tracker</span>
+                </button>
+                <button class="tool-btn" id="diagnostic-assistant-btn">
+                    <i class="fas fa-microscope"></i>
+                    <span>Diagnostic Assistant</span>
+                </button>
+                <button class="tool-btn" id="preventive-care-btn">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Preventive Care</span>
+                </button>
+                <button class="tool-btn" id="medication-btn">
+                    <i class="fas fa-pills"></i>
+                    <span>Medications</span>
+                </button>
+            </div>
+            
+            <div class="input-container">
+                <div class="input-wrapper">
+                    <textarea class="user-input" id="user-input" placeholder="Describe your symptoms or health concerns..." rows="1"></textarea>
+                    <div class="input-buttons">
+                        <button class="input-btn" id="voice-input-btn" title="Voice Input">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                        <button class="input-btn send-btn" id="send-btn">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="voice-controls">
+                    <button class="voice-btn" id="start-voice-btn">
+                        <i class="fas fa-microphone"></i>
+                        <span class="voice-btn-text">Voice Input</span>
+                    </button>
+                    <button class="voice-btn" id="stop-voice-btn" disabled>
+                        <i class=""></i>
+                        <span class="voice-btn-text"></span>
+                    </button>
+                    <button class="voice-btn" id="toggle-speech-btn">
+                        <i class="fas fa-volume-up"></i>
+                        <span class="voice-btn-text">Voice: ON</span>
+                    </button>
+                </div>
+                
+                <div class="voice-visualizer" id="voice-visualizer" style="display: none;">
+                    <div class="voice-bar"></div>
+                    <div class="voice-bar"></div>
+                    <div class="voice-bar"></div>
+                    <div class="voice-bar"></div>
+                    <div class="voice-bar"></div>
+                    <div class="voice-bar"></div>
+                    <div class="voice-bar"></div>
+                    <div class="voice-bar"></div>
+                    <div class="voice-bar"></div>
+                    <div class="voice-bar"></div>
+                </div>
+            </div>
+            
+            <div class="status-bar">
+                <div class="status">
+                    <div class="status-dot" id="status-dot"></div>
+                    <span id="status-text">Ready for consultation</span>
+                </div>
+                <div class="typing-indicator" id="typing-indicator" style="display: none;">
+                    <span>Dr. GenZ is analyzing</span>
+                    <div class="typing-dots">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="script.js"></script>
+</body>
+</html>
