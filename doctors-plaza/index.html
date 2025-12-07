@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Directory - Medical Services</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f7fa;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 5%;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo i {
+            font-size: 2rem;
+            color: #2a9d8f;
+        }
+
+        .logo h1 {
+            color: #264653;
+            font-size: 1.8rem;
+        }
+
+        .register-btn {
+            background-color: #2a9d8f;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.3s;
+        }
+
+        .register-btn:hover {
+            background-color: #21867a;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #e8f4f8 0%, #d1e7f0 100%);
+            padding: 4rem 5%;
+            text-align: center;
+        }
+
+        .hero-content h2 {
+            color: #264653;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero-content p {
+            color: #457b9d;
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+        }
+
+        .search-container {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 50px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .search-box input:focus {
+            border-color: #2a9d8f;
+        }
+
+        .search-box button {
+            background-color: #e76f51;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.3s;
+        }
+
+        .search-box button:hover {
+            background-color: #d65c40;
+        }
+
+        .location-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .location-select {
+            padding: 0.8rem 1rem;
+            border: 2px solid #ddd;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            background-color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .location-select:focus {
+            border-color: #2a9d8f;
+            outline: none;
+        }
+
+        .specializations-section, .doctors-section {
+            padding: 3rem 5%;
+        }
+
+        h3 {
+            color: #264653;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .specializations-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 3rem;
+        }
+
+        .specialization-btn {
+            background-color: white;
+            border: 2px solid #2a9d8f;
+            color: #2a9d8f;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .specialization-btn:hover {
+            background-color: #2a9d8f;
+            color: white;
+        }
+
+        .doctors-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .doctor-card {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .doctor-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .profile-img {
+            width: 100%;
+            height: 200px;
+            object-fit: 100%;
+        }
+
+        .doctor-info {
+            padding: 1.5rem;
+        }
+
+        .doctor-info h4 {
+            color: #264653;
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .specialization-tag {
+            display: inline-block;
+            background-color: #e8f4f8;
+            color: #2a9d8f;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .location-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 1rem;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .location-info i {
+            color: #e76f51;
+        }
+
+        .hospital-name {
+            font-weight: 600;
+            color: #264653;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .doctor-info p {
+            color: #666;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .experience {
+            color: #e76f51;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .contact-btn {
+            background-color: #264653;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+
+        .contact-btn:hover {
+            background-color: #1d3557;
+        }
+
+        footer {
+            background-color: #264653;
+            color: white;
+            text-align: center;
+            padding: 2rem 5%;
+            margin-top: 3rem;
+        }
+
+        footer p {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .close {
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        #doctorContactInfo {
+            margin-top: 1rem;
+        }
+
+        .contact-info-item {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .contact-info-item i {
+            color: #2a9d8f;
+            margin-right: 10px;
+            width: 20px;
+        }
+
+        /* Registration Form Styles */
+        .registration-form {
+            max-width: 600px;
+            margin: 2rem auto;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #264653;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: #2a9d8f;
+            outline: none;
+        }
+
+        .form-group textarea {
+            height: 120px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .submit-btn {
+            background-color: #2a9d8f;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+
+        .submit-btn:hover {
+            background-color: #21867a;
+        }
+
+        .submit-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .message {
+            padding: 1rem;
+            border-radius: 5px;
+            margin: 1rem 0;
+            text-align: center;
+            display: none;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .no-doctors {
+            text-align: center;
+            color: #666;
+            font-size: 1.2rem;
+            grid-column: 1 / -1;
+            padding: 2rem;
+        }
+
+        /* Tabs for switching between browse and register */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .tab-btn {
+            padding: 1rem 2rem;
+            background: none;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            color: #2a9d8f;
+            border-bottom: 3px solid #2a9d8f;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Success Modal Styles */
+        .success-modal .modal-content {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            color: #2a9d8f;
+            margin-bottom: 1.5rem;
+        }
+
+        .success-modal h3 {
+            color: #2a9d8f;
+            margin-bottom: 1rem;
+        }
+
+        .success-modal p {
+            color: #666;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .continue-btn {
+            background-color: #2a9d8f;
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+
+        .continue-btn:hover {
+            background-color: #21867a;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #2a9d8f;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero-content h2 {
+                font-size: 2rem;
+            }
+            
+            .search-box {
+                flex-direction: column;
+            }
+            
+            .search-box button {
+                justify-content: center;
+            }
+            
+            .doctors-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .navbar {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .location-filters {
+                flex-direction: column;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .success-modal .modal-content {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                <i class="fas fa-stethoscope"></i>
+                <h1>MedConnect</h1>
+            </div>
+            <a href="#" class="register-btn" onclick="showRegistrationTab()">
+                <i class="fas fa-user-md"></i> Register as Medical Provider
+            </a>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Tabs for switching between browse and register -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showBrowseTab()">
+                <i class="fas fa-search"></i> Browse Doctors
+            </button>
+            <button class="tab-btn" onclick="showRegistrationTab()">
+                <i class="fas fa-user-plus"></i> Register as Provider
+            </button>
+        </div>
+
+        <!-- Browse Doctors Tab -->
+        <div id="browseTab" class="tab-content active">
+            <section class="hero">
+                <div class="hero-content">
+                    <h2>Find the Right Specialist for Your Health Needs</h2>
+                    <p>Browse through our directory of qualified medical professionals</p>
+                    <div class="search-container">
+                        <div class="search-box">
+                            <input type="text" id="searchInput" placeholder="Search by specialization or hospital...">
+                            <button onclick="searchDoctors()">
+                                <i class="fas fa-search"></i> Search
+                            </button>
+                        </div>
+                        <div class="location-filters">
+                            <select id="countryFilter" class="location-select" onchange="filterDoctors()">
+                                <option value="">All Countries</option>
+                            </select>
+                            <select id="countyFilter" class="location-select" onchange="filterDoctors()">
+                                <option value="">All Counties</option>
+                            </select>
+                            <select id="hospitalTypeFilter" class="location-select" onchange="filterDoctors()">
+                                <option value="">All Facility Types</option>
+                                <option value="Hospital">Hospital</option>
+                                <option value="Clinic">Clinic</option>
+                                <option value="Private Practice">Private Practice</option>
+                                <option value="Medical Center">Medical Center</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="specializations-section">
+                <h3>Browse by Specialization</h3>
+                <div id="specializationsList" class="specializations-container">
+                    <!-- Specializations will be loaded here -->
+                </div>
+            </section>
+
+            <section class="doctors-section">
+                <h3>Available Doctors</h3>
+                <div id="doctorsList" class="doctors-container">
+                    <!-- Doctors will be loaded here -->
+                </div>
+            </section>
+        </div>
+
+        <!-- Registration Tab -->
+        <div id="registrationTab" class="tab-content">
+            <section class="hero">
+                <div class="hero-content">
+                    <h2>Join Our Medical Network</h2>
+                    <p>Register your practice to connect with patients</p>
+                </div>
+            </section>
+
+            <section class="specializations-section">
+                <div class="registration-form">
+                    <h3>Register as a Medical Service Provider</h3>
+                    
+                    <div id="message" class="message" style="display: none;"></div>
+                    
+                    <!-- Formspree Form -->
+                    <form id="registrationForm" action="https://formspree.io/f/xgvglvab" method="POST">
+                        <h4 style="color: #2a9d8f; margin-bottom: 1.5rem; border-bottom: 2px solid #e8f4f8; padding-bottom: 0.5rem;">
+                            <i class="fas fa-user-md"></i> Personal Information
+                        </h4>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="full_name"><i class="fas fa-user"></i> Full Name *</label>
+                                <input type="text" id="full_name" name="full_name" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="email"><i class="fas fa-envelope"></i> Email Address *</label>
+                                <input type="email" id="email" name="email" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="phone"><i class="fas fa-phone"></i> Phone Number *</label>
+                                <input type="tel" id="phone" name="phone" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="specialization"><i class="fas fa-stethoscope"></i> Specialization *</label>
+                                <input type="text" id="reg_specialization" name="specialization" required 
+                                       placeholder="e.g., Cardiology, Neurology, Pediatrics">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="experience_years"><i class="fas fa-briefcase"></i> Years of Experience</label>
+                            <input type="number" id="experience_years" name="experience_years" min="0" max="50">
+                        </div>
+
+                        <h4 style="color: #2a9d8f; margin: 2rem 0 1.5rem 0; border-bottom: 2px solid #e8f4f8; padding-bottom: 0.5rem;">
+                            <i class="fas fa-hospital"></i> Workplace Information
+                        </h4>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="hospital_name"><i class="fas fa-hospital-alt"></i> Hospital/Clinic Name *</label>
+                                <input type="text" id="hospital_name" name="hospital_name" required 
+                                       placeholder="e.g., City General Hospital">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="hospital_type"><i class="fas fa-clinic-medical"></i> Facility Type *</label>
+                                <select id="hospital_type" name="hospital_type" required>
+                                    <option value="">Select type</option>
+                                    <option value="Hospital">Hospital</option>
+                                    <option value="Clinic">Clinic</option>
+                                    <option value="Private Practice">Private Practice</option>
+                                    <option value="Medical Center">Medical Center</option>
+                                    <option value="Health Center">Health Center</option>
+                                    <option value="Specialty Center">Specialty Center</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="hospital_address"><i class="fas fa-map-marker-alt"></i> Hospital Address *</label>
+                            <input type="text" id="hospital_address" name="hospital_address" required 
+                                   placeholder="e.g., 123 Medical Street">
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="country"><i class="fas fa-globe"></i> Country *</label>
+                                <select id="country" name="country" required onchange="updateCounties()">
+                                    <option value="">Select country</option>
+                                    <option value="Kenya">Kenya</option>
+                                    <option value="Uganda">Uganda</option>
+                                    <option value="Tanzania">Tanzania</option>
+                                    <option value="Rwanda">Rwanda</option>
+                                    <option value="Ethiopia">Ethiopia</option>
+                                    <option value="South Africa">South Africa</option>
+                                    <option value="Nigeria">Nigeria</option>
+                                    <option value="Ghana">Ghana</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="county"><i class="fas fa-map"></i> County/Region *</label>
+                                <select id="county" name="county" required>
+                                    <option value="">Select county</option>
+                                    <!-- Counties will be populated based on country -->
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description"><i class="fas fa-file-alt"></i> Professional Description *</label>
+                            <textarea id="description" name="description" required
+                                      placeholder="Describe your expertise, qualifications, services offered, and approach to patient care..."></textarea>
+                        </div>
+
+                        <!-- Hidden field for Formspree configuration -->
+                        <input type="hidden" name="_subject" value="New Doctor Registration - MedConnect">
+                        <input type="hidden" name="_replyto" id="reply_to_email">
+                        <input type="hidden" name="_captcha" value="false">
+                        <input type="text" name="_gotcha" style="display:none">
+                        
+                        <button type="submit" class="submit-btn" id="submitBtn">
+                            <i class="fas fa-user-plus"></i> Submit Registration
+                        </button>
+                    </form>
+                    
+                    <div class="message info" style="margin-top: 2rem;">
+                        <p><i class="fas fa-info-circle"></i> <strong>How it works:</strong></p>
+                        <p>1. Fill in your details</p>
+                        <p>2. Submit the form</p>
+                        <p>3. You'll receive a confirmation notification</p>
+                        <p>4. Your information will be sent to our team via email</p>
+                        <p>5. We'll review and add you to the directory within 24 hours</p>
+                        <p><small>Note: Profile pictures are added by our team after verification.</small></p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <p>© 2024 MedConnect. All rights reserved.</p>
+        <p>Contact: support@medconnect.com | Phone: 1-800-MED-CARE</p>
+    </footer>
+
+    <!-- Contact Modal -->
+    <div id="contactModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeContactModal()">&times;</span>
+            <h3>Contact Doctor</h3>
+            <div id="doctorContactInfo">
+                <!-- Contact info will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="modal success-modal">
+        <div class="modal-content">
+            <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h3>Thank You for Registering!</h3>
+            <p>Your registration has been submitted successfully to our Formspree system.</p>
+            <p>Our team will receive your details via email and add you to our directory within 24-48 hours.</p>
+            <p>We will add a professional profile picture during the verification process.</p>
+            <p>If you have any questions, please contact us at support@medconnect.com</p>
+            <button class="continue-btn" onclick="closeSuccessModal()">Continue Browsing</button>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let doctors = [];
+        let specializations = [];
+        let countries = [];
+        let counties = [];
+
+        // County data by country
+        const countyData = {
+            'Kenya': [
+                'Nairobi', 'Mombasa', 'Kisumu', 'Nakuru', 'Uasin Gishu', 'Kiambu', 'Kakamega',
+                'Bungoma', 'Meru', 'Kisii', 'Migori', 'Machakos', 'Kitui', 'Garissa', 'Wajir',
+                'Mandera', 'Marsabit', 'Isiolo', 'Nyeri', 'Kirinyaga', 'Muranga', 'Nyandarua',
+                'Laikipia', 'Nandi', 'Baringo', 'Samburu', 'Turkana', 'West Pokot', 'Trans Nzoia',
+                'Elgeyo Marakwet', 'Bomet', 'Kericho', 'Narok', 'Kajiado', 'Makueni', 'Taita Taveta',
+                'Kwale', 'Kilifi', 'Tana River', 'Lamu', 'Homa Bay', 'Siaya', 'Busia', 'Vihiga',
+                'Tharaka Nithi', 'Embu', 'Nyamira'
+            ],
+            'Uganda': [
+                'Kampala', 'Wakiso', 'Mukono', 'Jinja', 'Mbale', 'Mbarara', 'Gulu', 'Lira',
+                'Arua', 'Soroti', 'Masaka', 'Entebbe', 'Fort Portal', 'Hoima', 'Kabale', 'Kasese'
+            ],
+            'Tanzania': [
+                'Dar es Salaam', 'Arusha', 'Mwanza', 'Dodoma', 'Mbeya', 'Morogoro', 'Tanga',
+                'Kahama', 'Tabora', 'Zanzibar', 'Moshi', 'Kigoma', 'Shinyanga', 'Mtwara'
+            ],
+            'Rwanda': [
+                'Kigali', 'Eastern Province', 'Northern Province', 'Western Province', 'Southern Province'
+            ],
+            'Ethiopia': [
+                'Addis Ababa', 'Oromia', 'Amhara', 'Tigray', 'Somali', 'Afar', 'SNNPR', 'Gambela', 'Harari', 'Dire Dawa'
+            ],
+            'South Africa': [
+                'Gauteng', 'Western Cape', 'KwaZulu-Natal', 'Eastern Cape', 'Free State',
+                'Limpopo', 'Mpumalanga', 'North West', 'Northern Cape'
+            ],
+            'Nigeria': [
+                'Lagos', 'Kano', 'Abuja', 'Rivers', 'Delta', 'Oyo', 'Imo', 'Kaduna', 'Edo', 'Plateau'
+            ],
+            'Ghana': [
+                'Greater Accra', 'Ashanti', 'Western', 'Eastern', 'Central', 'Volta', 'Brong Ahafo',
+                'Northern', 'Upper East', 'Upper West'
+            ]
+        };
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', () => {
+            // Close modals when clicking outside
+            window.addEventListener('click', (e) => {
+                if (e.target === contactModal) {
+                    closeContactModal();
+                }
+                if (e.target === successModal) {
+                    closeSuccessModal();
+                }
+            });
+            
+            // Search when pressing Enter
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    searchDoctors();
+                }
+            });
+            
+            // Form submission handler
+            document.getElementById('registrationForm').addEventListener('submit', handleFormSubmission);
+            
+            // Initialize filters
+            initializeFilters();
+            
+            // Load sample data
+            loadSampleDoctors();
+        });
+
+        // Initialize location filters
+        function initializeFilters() {
+            // Populate country filter
+            const countries = Object.keys(countyData);
+            countries.forEach(country => {
+                const option = document.createElement('option');
+                option.value = country;
+                option.textContent = country;
+                countryFilter.appendChild(option);
+            });
+        }
+
+        // Update counties based on selected country
+        function updateCounties() {
+            const country = document.getElementById('country').value;
+            const countySelect = document.getElementById('county');
+            countySelect.innerHTML = '<option value="">Select county</option>';
+            
+            if (country && countyData[country]) {
+                countyData[country].forEach(county => {
+                    const option = document.createElement('option');
+                    option.value = county;
+                    option.textContent = county;
+                    countySelect.appendChild(option);
+                });
+            }
+        }
+
+        // Tab switching functions
+        function showBrowseTab() {
+            browseTab.classList.add('active');
+            registrationTab.classList.remove('active');
+            tabBtns[0].classList.add('active');
+            tabBtns[1].classList.remove('active');
+        }
+
+        function showRegistrationTab() {
+            browseTab.classList.remove('active');
+            registrationTab.classList.add('active');
+            tabBtns[0].classList.remove('active');
+            tabBtns[1].classList.add('active');
+        }
+
+        // Load sample doctors (with pictures for display)
+        function loadSampleDoctors() {
+            doctors = getSampleDoctors();
+            displayDoctors(doctors);
+            updateFilters();
+            updateSpecializations();
+        }
+
+        // Update filters based on current doctors
+        function updateFilters() {
+            // Get unique countries and counties from doctors
+            const uniqueCountries = [...new Set(doctors.map(doctor => doctor.country))].filter(Boolean);
+            const uniqueCounties = [...new Set(doctors.map(doctor => doctor.county))].filter(Boolean);
+            
+            // Update country filter
+            countries = uniqueCountries;
+            
+            // Update county filter
+            counties = uniqueCounties;
+        }
+
+        // Update specializations from current doctors
+        function updateSpecializations() {
+            const uniqueSpecializations = [...new Set(doctors.map(doctor => doctor.specialization))];
+            specializations = uniqueSpecializations;
+            displaySpecializations();
+        }
+
+        // Display doctors in the UI (WITH PICTURES)
+        function displayDoctors(doctorsArray) {
+            if (doctorsArray.length === 0) {
+                doctorsList.innerHTML = '<p class="no-doctors">No doctors found matching your criteria.</p>';
+                return;
+            }
+
+            doctorsList.innerHTML = doctorsArray.map(doctor => `
+                <div class="doctor-card">
+                    <img src="${doctor.profile_picture || 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&h=300&fit=crop'}" 
+                         alt="${doctor.full_name}" class="profile-img">
+                    <div class="doctor-info">
+                        <h4>${doctor.full_name}</h4>
+                        <span class="specialization-tag">${doctor.specialization}</span>
+                        
+                        <div class="hospital-name">
+                            <i class="fas fa-hospital"></i>
+                            ${doctor.hospital_name || 'Not specified'}
+                        </div>
+                        
+                        <div class="location-info">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>${doctor.hospital_address || ''}</span>
+                        </div>
+                        
+                        <div class="location-info">
+                            <i class="fas fa-globe"></i>
+                            <span>${doctor.county || ''}, ${doctor.country || ''}</span>
+                        </div>
+                        
+                        <p>${doctor.description || 'No description available.'}</p>
+                        
+                        ${doctor.experience_years ? `
+                            <div class="experience">
+                                <i class="fas fa-briefcase"></i>
+                                ${doctor.experience_years} years of experience
+                            </div>
+                        ` : ''}
+                        
+                        <button class="contact-btn" onclick="showContactModal('${doctor.id}')">
+                            <i class="fas fa-phone-alt"></i> Contact Doctor
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Display specializations as clickable buttons
+        function displaySpecializations() {
+            specializationsList.innerHTML = specializations.map(spec => `
+                <button class="specialization-btn" onclick="filterBySpecialization('${spec}')">
+                    ${spec}
+                </button>
+            `).join('');
+        }
+
+        // Search doctors by specialization or hospital name
+        function searchDoctors() {
+            const query = searchInput.value.trim().toLowerCase();
+            if (query) {
+                const filteredDoctors = doctors.filter(doctor => 
+                    doctor.specialization.toLowerCase().includes(query) ||
+                    doctor.hospital_name.toLowerCase().includes(query) ||
+                    doctor.description.toLowerCase().includes(query)
+                );
+                displayDoctors(filteredDoctors);
+            } else {
+                filterDoctors(); // Use current filter values
+            }
+        }
+
+        // Filter doctors by multiple criteria
+        function filterDoctors() {
+            const country = countryFilter.value;
+            const county = countyFilter.value;
+            const hospitalType = hospitalTypeFilter.value;
+            const searchQuery = searchInput.value.trim().toLowerCase();
+            
+            let filteredDoctors = doctors;
+            
+            // Apply country filter
+            if (country) {
+                filteredDoctors = filteredDoctors.filter(doctor => doctor.country === country);
+            }
+            
+            // Apply county filter
+            if (county) {
+                filteredDoctors = filteredDoctors.filter(doctor => doctor.country === county);
+            }
+            
+            // Apply hospital type filter
+            if (hospitalType) {
+                filteredDoctors = filteredDoctors.filter(doctor => doctor.hospital_type === hospitalType);
+            }
+            
+            // Apply search query
+            if (searchQuery) {
+                filteredDoctors = filteredDoctors.filter(doctor => 
+                    doctor.specialization.toLowerCase().includes(searchQuery) ||
+                    doctor.hospital_name.toLowerCase().includes(searchQuery) ||
+                    doctor.description.toLowerCase().includes(searchQuery) ||
+                    doctor.full_name.toLowerCase().includes(searchQuery)
+                );
+            }
+            
+            displayDoctors(filteredDoctors);
+        }
+
+        // Filter by specialization only
+        function filterBySpecialization(specialization) {
+            const filteredDoctors = doctors.filter(doctor => 
+                doctor.specialization === specialization
+            );
+            displayDoctors(filteredDoctors);
+            searchInput.value = specialization;
+        }
+
+        // Show contact modal with doctor's information (WITH PICTURE IN MODAL)
+        function showContactModal(doctorId) {
+            const doctor = doctors.find(d => d.id === doctorId);
+            if (!doctor) return;
+
+            document.getElementById('doctorContactInfo').innerHTML = `
+                <div class="doctor-contact-header" style="margin-bottom: 1.5rem; text-align: center;">
+                    <img src="${doctor.profile_picture || 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=200&h=200&fit=crop'}" 
+                         alt="${doctor.full_name}" 
+                         style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin-bottom: 1rem; border: 3px solid #2a9d8f;">
+                    <h4 style="color: #264653; margin-bottom: 0.5rem;">${doctor.full_name}</h4>
+                    <p class="specialization-tag">${doctor.specialization}</p>
+                </div>
+                
+                <div class="contact-info-item">
+                    <i class="fas fa-envelope"></i>
+                    <div>
+                        <strong>Email:</strong><br>
+                        ${doctor.email}
+                    </div>
+                </div>
+                
+                <div class="contact-info-item">
+                    <i class="fas fa-phone"></i>
+                    <div>
+                        <strong>Phone:</strong><br>
+                        ${doctor.phone || 'Not provided'}
+                    </div>
+                </div>
+                
+                <div class="contact-info-item">
+                    <i class="fas fa-hospital"></i>
+                    <div>
+                        <strong>Workplace:</strong><br>
+                        ${doctor.hospital_name || 'Not specified'} (${doctor.hospital_type || 'Not specified'})
+                    </div>
+                </div>
+                
+                <div class="contact-info-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <div>
+                        <strong>Location:</strong><br>
+                        ${doctor.hospital_address || 'Not specified'}<br>
+                        ${doctor.county || ''}, ${doctor.country || ''}
+                    </div>
+                </div>
+                
+                ${doctor.experience_years ? `
+                    <div class="contact-info-item">
+                        <i class="fas fa-briefcase"></i>
+                        <div>
+                            <strong>Experience:</strong><br>
+                            ${doctor.experience_years} years
+                        </div>
+                    </div>
+                ` : ''}
+                
+                <div style="margin-top: 1.5rem; padding: 1rem; background-color: #e8f4f8; border-radius: 5px;">
+                    <p style="margin: 0; color: #2a9d8f;">
+                        <i class="fas fa-info-circle"></i> Please be professional when contacting doctors.
+                    </p>
+                </div>
+            `;
+
+            contactModal.style.display = 'block';
+        }
+
+        // Close contact modal
+        function closeContactModal() {
+            contactModal.style.display = 'none';
+        }
+
+        // Close success modal
+        function closeSuccessModal() {
+            successModal.style.display = 'none';
+            showBrowseTab();
+        }
+
+        // Show success modal
+        function showSuccessModal() {
+            successModal.style.display = 'block';
+        }
+
+        // Get field value with trim
+        function getFieldValue(fieldId) {
+            const element = document.getElementById(fieldId);
+            return element ? element.value.trim() : '';
+        }
+
+        // Handle form submission
+        async function handleFormSubmission(e) {
+    e.preventDefault();
+
+    const messageDiv = document.getElementById('message');
+    const submitBtn = document.getElementById('submitBtn');
+    const originalBtnText = submitBtn.innerHTML;
+
+    // Validate required fields
+    const fieldChecks = [
+        { id: 'full_name', name: 'Full Name', value: getFieldValue('full_name') },
+        { id: 'email', name: 'Email', value: getFieldValue('email') },
+        { id: 'phone', name: 'Phone', value: getFieldValue('phone') },
+        { id: 'reg_specialization', name: 'Specialization', value: getFieldValue('reg_specialization') },
+        { id: 'hospital_name', name: 'Hospital/Clinic Name', value: getFieldValue('hospital_name') },
+        { id: 'hospital_type', name: 'Facility Type', value: document.getElementById('hospital_type')?.value },
+        { id: 'hospital_address', name: 'Hospital Address', value: getFieldValue('hospital_address') },
+        { id: 'country', name: 'Country', value: document.getElementById('country')?.value },
+        { id: 'county', name: 'County', value: document.getElementById('county')?.value },
+        { id: 'description', name: 'Professional Description', value: getFieldValue('description') }
+    ];
+
+    const missingFields = fieldChecks.filter(field => !field.value);
+
+    if (missingFields.length > 0) {
+        const fieldNames = missingFields.map(f => f.name).join(', ');
+        messageDiv.innerHTML = `
+            <i class="fas fa-exclamation-circle"></i>
+            Please fill in the following required fields: ${fieldNames}
+        `;
+        messageDiv.className = 'message error';
+        messageDiv.style.display = 'block';
+
+        missingFields.forEach(field => {
+            const element = document.getElementById(field.id);
+            if (element) {
+                element.style.borderColor = '#e76f51';
+                element.focus();
+            }
+        });
+        return;
+    }
+
+    const email = getFieldValue('email');
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(email)) {
+        messageDiv.innerHTML = `
+            <i class="fas fa-exclamation-circle"></i>
+            Please enter a valid email address.
+        `;
+        messageDiv.className = 'message error';
+        messageDiv.style.display = 'block';
+        document.getElementById('email').style.borderColor = '#e76f51';
+        document.getElementById('email').focus();
+        return;
+    }
+
+    try {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="loading"></span> Submitting...';
+
+        // Set reply-to
+        document.getElementById('reply_to_email').value = email;
+
+        // Simulated delay
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        // Show success modal
+        showSuccessModal();
+
+        // 🔥 FIX: Actually submit the form now
+        document.getElementById('registrationForm').submit();
+
+    } catch (error) {
+        console.error('Form submission error:', error);
+        messageDiv.innerHTML = `
+            <i class="fas fa-exclamation-circle"></i>
+            Error: ${error.message || 'Submission failed. Please try again.'}
+        `;
+        messageDiv.className = 'message error';
+        messageDiv.style.display = 'block';
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
+    }
+}
+
+       
+        // Sample doctors for browsing display (WITH PICTURES)
+        function getSampleDoctors() {
+            return [
+                {
+                    id: 'doctor_1',
+                    full_name: 'Dr. Sarah Johnson',
+                    email: 'sarah.j@example.com',
+                    phone: '+254 712 345 678',
+                    specialization: 'Cardiology',
+                    description: 'Expert in cardiovascular diseases with 15 years experience. Specializes in preventive cardiology and heart failure management.',
+                    experience_years: 15,
+                    profile_picture: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&h=400&fit=crop',
+                    hospital_name: 'Nairobi Heart Center',
+                    hospital_type: 'Specialty Center',
+                    hospital_address: '123 Cardiac Road, Upper Hill',
+                    country: 'Kenya',
+                    county: 'Nairobi'
+                },
+                {
+                    id: 'doctor_2',
+                    full_name: 'Dr. Michael Chen',
+                    email: 'm.chen@example.com',
+                    phone: '+254 723 456 789',
+                    specialization: 'Neurology',
+                    description: 'Specialized in neurological disorders and treatment. Expert in migraine management and neurodegenerative diseases.',
+                    experience_years: 12,
+                    profile_picture: 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=400&h=400&fit=crop',
+                    hospital_name: 'Aga Khan University Hospital',
+                    hospital_type: 'Hospital',
+                    hospital_address: '3rd Parklands Avenue',
+                    country: 'Kenya',
+                    county: 'Nairobi'
+                },
+                {
+                    id: 'doctor_3',
+                    full_name: 'Dr. Priya Sharma',
+                    email: 'priya.s@example.com',
+                    phone: '+254 734 567 890',
+                    specialization: 'Pediatrics',
+                    description: 'Pediatric specialist with focus on child development and preventive care. Friendly approach to children healthcare.',
+                    experience_years: 8,
+                    profile_picture: 'https://images.unsplash.com/photo-1594824434340-7e7dfc37cabb?w=400&h=400&fit=crop',
+                    hospital_name: 'Mombasa Children Clinic',
+                    hospital_type: 'Clinic',
+                    hospital_address: '456 Nyali Road',
+                    country: 'Kenya',
+                    county: 'Mombasa'
+                },
+                {
+                    id: 'doctor_4',
+                    full_name: 'Dr. Robert Wilson',
+                    email: 'r.wilson@example.com',
+                    phone: '+254 745 678 901',
+                    specialization: 'Orthopedics',
+                    description: 'Orthopedic surgeon specializing in sports injuries and joint replacement. Advanced arthroscopy techniques.',
+                    experience_years: 20,
+                    profile_picture: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=400&h=400&fit=crop',
+                    hospital_name: 'Nairobi Orthopedic Hospital',
+                    hospital_type: 'Hospital',
+                    hospital_address: '789 Bone Street',
+                    country: 'Kenya',
+                    county: 'Nairobi'
+                },
+                {
+                    id: 'doctor_5',
+                    full_name: 'Dr. Lisa Martinez',
+                    email: 'l.martinez@example.com',
+                    phone: '+254 756 789 012',
+                    specialization: 'Dermatology',
+                    description: 'Dermatologist with expertise in skin cancer detection and cosmetic dermatology. Holistic approach to skin health.',
+                    experience_years: 10,
+                    profile_picture: 'https://images.unsplash.com/photo-1591608971362-f08b2a75731a?w=400&h=400&fit=crop',
+                    hospital_name: 'Skin Care Specialists',
+                    hospital_type: 'Private Practice',
+                    hospital_address: '101 Skin Avenue',
+                    country: 'Kenya',
+                    county: 'Nairobi'
+                },
+                {
+                    id: 'doctor_6',
+                    full_name: 'Dr. David Kim',
+                    email: 'd.kim@example.com',
+                    phone: '+254 767 890 123',
+                    specialization: 'Cardiology',
+                    description: 'Interventional cardiologist with focus on minimally invasive procedures and cardiac rehabilitation.',
+                    experience_years: 18,
+                    profile_picture: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&h=400&fit=crop',
+                    hospital_name: 'Kenyatta National Hospital',
+                    hospital_type: 'Hospital',
+                    hospital_address: 'Hospital Road',
+                    country: 'Kenya',
+                    county: 'Nairobi'
+                }
+            ];
+        }
+    </script>
+</body>
+</html>

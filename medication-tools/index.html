@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Good News! Medication Tools Coming Soon</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .notification-card {
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            overflow: hidden;
+            position: relative;
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        .header {
+            background: linear-gradient(to right, #4b6cb7, #182848);
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            opacity: 0.3;
+            animation: float 20s linear infinite;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .badge {
+            background-color: #ff6b6b;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            display: inline-block;
+            margin-top: 15px;
+            position: relative;
+            z-index: 2;
+            animation: pulse 2s infinite;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .message {
+            font-size: 1.3rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            text-align: center;
+            color: #444;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .feature {
+            background-color: #f8f9ff;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            transition: transform 0.3s ease;
+            border: 1px solid #e6e9ff;
+        }
+        
+        .feature:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(75, 108, 183, 0.1);
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            color: #4b6cb7;
+            margin-bottom: 15px;
+        }
+        
+        .feature h3 {
+            margin-bottom: 10px;
+            color: #182848;
+        }
+        
+        .feature p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+        
+        .countdown {
+            background-color: #f0f4ff;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .countdown h3 {
+            color: #182848;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .timer {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .time-unit {
+            background-color: white;
+            border-radius: 10px;
+            padding: 15px;
+            min-width: 80px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .time-value {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #4b6cb7;
+            display: block;
+        }
+        
+        .time-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 5px;
+            display: block;
+        }
+        
+        .cta-button {
+            display: block;
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(to right, #4b6cb7, #182848);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            letter-spacing: 0.5px;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(75, 108, 183, 0.3);
+            background: linear-gradient(to right, #5a7bc9, #2a3a68);
+        }
+        
+        .footer {
+            text-align: center;
+            color: #777;
+            font-size: 0.9rem;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes float {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(20px, 20px) rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .header p {
+                font-size: 1rem;
+            }
+            
+            .content {
+                padding: 25px;
+            }
+            
+            .message {
+                font-size: 1.1rem;
+            }
+            
+            .timer {
+                flex-wrap: wrap;
+            }
+            
+            .time-unit {
+                min-width: 70px;
+                padding: 12px;
+            }
+            
+            .time-value {
+                font-size: 1.8rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.7rem;
+            }
+            
+            .features {
+                grid-template-columns: 1fr;
+            }
+            
+            .timer {
+                gap: 10px;
+            }
+            
+            .time-unit {
+                min-width: 60px;
+                padding: 10px;
+            }
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background-color: #ff6b6b;
+            border-radius: 50%;
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="notification-card">
+        <div class="header">
+            <h1><i class="fas fa-pills"></i> Good News!</h1>
+            <p>Medication Tools Are Coming Sooner Than Expected</p>
+            <div class="badge">
+                <i class="fas fa-bolt"></i> Ahead of Schedule!
+            </div>
+        </div>
+        
+        <div class="content">
+            <p class="message">
+                Thanks to the great progress from our team, the <strong>launch is ahead of schedule!</strong> 
+                The tools you've been waiting for to track and manage medications will be in your hands 
+                sooner than we initially thought.
+            </p>
+            
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <h3>Smart Reminders</h3>
+                    <p>Customizable alerts to never miss a dose again. Set reminders that work with your schedule.</p>
+                </div>
+                
+                <div class="feature">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Tracking Insights</h3>
+                    <p>Visualize your medication history with easy-to-read charts and progress reports.</p>
+                </div>
+                
+                <div class="feature">
+                    <div class="feature-icon">
+                        <i class="fas fa-list-alt"></i>
+                    </div>
+                    <h3>Simple Logging</h3>
+                    <p>Quickly log medications with our intuitive interface. Add notes and track side effects.</p>
+                </div>
+            </div>
+            
+            <div class="countdown">
+                <h3>Expected Release In:</h3>
+                <div class="timer">
+                    <div class="time-unit">
+                        <span id="days" class="time-value">07</span>
+                        <span class="time-label">Days</span>
+                    </div>
+                    <div class="time-unit">
+                        <span id="hours" class="time-value">12</span>
+                        <span class="time-label">Hours</span>
+                    </div>
+                    <div class="time-unit">
+                        <span id="minutes" class="time-value">45</span>
+                        <span class="time-label">Minutes</span>
+                    </div>
+                    <div class="time-unit">
+                        <span id="seconds" class="time-value">30</span>
+                        <span class="time-label">Seconds</span>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="cta-button" id="notifyBtn">
+                <i class="fas fa-bell"></i> Notify Me When It's Ready
+            </button>
+            
+            <p class="footer">
+                We are finalizing the update and will announce the specific release date shortly. 
+                Thank you for your patience and support—we can't wait for you to use it!
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Countdown Timer
+        function updateCountdown() {
+            // Set the target date (7 days from now)
+            const targetDate = new Date();
+            targetDate.setDate(targetDate.getDate() + 7);
+            targetDate.setHours(10, 0, 0, 0); // Set to 10:00 AM
+            
+            const now = new Date().getTime();
+            const timeLeft = targetDate - now;
+            
+            // Calculate days, hours, minutes, seconds
+            const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+            
+            // Update the display
+            document.getElementById('days').textContent = days.toString().padStart(2, '0');
+            document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+            document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+            document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+            
+            // If the countdown is finished
+            if (timeLeft < 0) {
+                clearInterval(countdownInterval);
+                document.querySelector('.countdown h3').textContent = "Update Released!";
+                document.querySelector('.timer').innerHTML = '<div style="font-size: 1.5rem; color: #4b6cb7; padding: 20px;">The medication tools are now available! 🎉</div>';
+            }
+        }
+        
+        // Initialize countdown
+        updateCountdown();
+        const countdownInterval = setInterval(updateCountdown, 1000);
+        
+        // Notify Button Interaction
+        document.getElementById('notifyBtn').addEventListener('click', function() {
+            const button = this;
+            const originalText = button.innerHTML;
+            
+            // Change button text and style
+            button.innerHTML = '<i class="fas fa-check"></i> You\'ll Be Notified!';
+            button.style.background = 'linear-gradient(to right, #2ecc71, #27ae60)';
+            
+            // Create confetti effect
+            createConfetti();
+            
+            // Reset button after 3 seconds
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.style.background = 'linear-gradient(to right, #4b6cb7, #182848)';
+            }, 3000);
+        });
+        
+        // Confetti effect function
+        function createConfetti() {
+            const colors = ['#ff6b6b', '#4b6cb7', '#2ecc71', '#f39c12', '#9b59b6'];
+            const card = document.querySelector('.notification-card');
+            
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.top = '-20px';
+                confetti.style.transform = `scale(${Math.random() * 0.5 + 0.5})`;
+                card.appendChild(confetti);
+                
+                // Animate confetti
+                const animationDuration = Math.random() * 2 + 1;
+                const animationDelay = Math.random() * 0.5;
+                
+                confetti.style.animation = `
+                    confettiFall ${animationDuration}s ease-out ${animationDelay}s forwards,
+                    confettiRotate ${animationDuration}s linear ${animationDelay}s forwards
+                `;
+                
+                // Remove confetti after animation
+                setTimeout(() => {
+                    confetti.remove();
+                }, (animationDuration + animationDelay) * 1000);
+            }
+            
+            // Add CSS for confetti animation
+            if (!document.querySelector('#confetti-styles')) {
+                const style = document.createElement('style');
+                style.id = 'confetti-styles';
+                style.textContent = `
+                    @keyframes confettiFall {
+                        0% { opacity: 1; transform: translateY(0) rotate(0deg); }
+                        100% { opacity: 0; transform: translateY(500px) rotate(360deg); }
+                    }
+                    
+                    @keyframes confettiRotate {
+                        0% { transform: rotate(0deg); }
+                        100% { transform: rotate(360deg); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+        
+        // Feature cards hover effect enhancement
+        const featureCards = document.querySelectorAll('.feature');
+        featureCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.borderColor = '#4b6cb7';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.borderColor = '#e6e9ff';
+            });
+        });
+    </script>
+</body>
+</html>
