@@ -1,4 +1,4 @@
-// API Configuratio
+// API Configuration
 const API_BASE_URL = 'http://localhost:3000/api'; // Change this to your backend URL
 
 // DOM Elements
@@ -43,7 +43,7 @@ let currentSessionId = null;
 let isChatStarted = false;
 
 // Voice settings
-let isSpeechEnabled = true;
+let isSpeechEnabled = false;
 let isVoiceActive = false;
 let voiceBars = [];
 
@@ -53,335 +53,14 @@ let isSidebarOpen = false;
 // Conversation history
 let conversationHistoryData = [];
 
-// Initialize voice visualization bars
-function initializeVoiceVisualizer() {
-    voiceBars = Array.from(voiceVisualizer.querySelectorAll('.voice-bar'));
-}
-
-// Update voice visualization
-function updateVoiceVisualization(volume) {
-    if (!isVoiceActive) return;
-    
-    voiceBars.forEach((bar, index) => {
-        const shouldBeActive = index < Math.floor(volume / 10);
-        if (shouldBeActive) {
-            bar.classList.add('active');
-            bar.style.height = `${10 + (index * 5)}px`;
-        } else {
-            bar.classList.remove('active');
-            bar.style.height = '4px';
-        }
-    });
-}
-
-// Auto-resize textarea
-userInput.addEventListener('input', function() {
-    this.style.height = 'auto';
-    this.style.height = (this.scrollHeight) + 'px';
-});
-
-// Mobile sidebar toggle
-function toggleSidebar() {
-    isSidebarOpen = !isSidebarOpen;
-    sidebar.classList.toggle('open', isSidebarOpen);
-    sidebarOverlay.classList.toggle('active', isSidebarOpen);
-    
-    // Update menu icon
-    const menuIcon = mobileMenuBtn.querySelector('i');
-    if (isSidebarOpen) {
-        menuIcon.classList.remove('fa-bars');
-        menuIcon.classList.add('fa-times');
-    } else {
-        menuIcon.classList.remove('fa-times');
-        menuIcon.classList.add('fa-bars');
-    }
-}
-
-mobileMenuBtn.addEventListener('click', toggleSidebar);
-sidebarOverlay.addEventListener('click', toggleSidebar);
-
-// Close sidebar when clicking on a history item (mobile)
-document.querySelectorAll('.history-item').forEach(item => {
-    item.addEventListener('click', () => {
-        if (window.innerWidth <= 768) {
-            toggleSidebar();
-        }
-    });
-});
-
-// Speech Recognition Setup
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-let recognition;
-let isListening = false;
-
-if (SpeechRecognition) {
-    recognition = new SpeechRecognition();
-    recognition.continuous = false;
-    recognition.interimResults = true;
-    recognition.lang = 'en-US';
-    
-    recognition.onstart = function() {
-        statusText.textContent = "Listening... Please describe your symptoms";
-        voiceInputBtn.style.color = "#ef4444";
-        startVoiceBtn.classList.add('active');
-        stopVoiceBtn.disabled = false;
-        isListening = true;
-        isVoiceActive = true;
-        voiceVisualizer.style.display = 'flex';
-        voiceRecordingIndicator.style.display = 'block';
-    };
-    
-    recognition.onresult = function(event) {
-        const transcript = Array.from(event.results)
-            .map(result => result[0])
-            .map(result => result.transcript)
-            .join('');
-        
-        userInput.value = transcript;
-        userInput.dispatchEvent(new Event('input'));
-        
-        // Simulate voice visualization based on transcript length
-        const volume = Math.min(100, transcript.length * 2);
-        updateVoiceVisualization(volume);
-    };
-    
-    recognition.onerror = function(event) {
-        console.error("Speech recognition error:", event.error);
-        statusText.textContent = "Error: " + event.error;
-        voiceInputBtn.style.color = "";
-        startVoiceBtn.classList.remove('active');
-        stopVoiceBtn.disabled = true;
-        isListening = false;
-        isVoiceActive = false;
-        voiceVisualizer.style.display = 'none';
-        voiceRecordingIndicator.style.display = 'none';
-    };
-    
-    recognition.onend = function() {
-        if (isListening) {
-            statusText.textContent = "Processing your symptoms...";
-            voiceInputBtn.style.color = "";
-            startVoiceBtn.classList.remove('active');
-            stopVoiceBtn.disabled = true;
-            isListening = false;
-            isVoiceActive = false;
-            voiceVisualizer.style.display = 'none';
-            voiceRecordingIndicator.style.display = 'none';
-            
-            // Auto-send if there's text
-            if (userInput.value.trim()) {
-                setTimeout(() => {
-                    sendMessage();
-                }, 500);
-            }
-        }
-    };
-} else {
-    voiceInputBtn.disabled = true;
-    startVoiceBtn.disabled = true;
-    voiceInputBtn.title = "Speech Recognition not supported in your browser";
-    startVoiceBtn.title = "Speech Recognition not supported in your browser";
-}
-
-// Event Listeners
-startChatBtn.addEventListener('click', startChat);
-sendBtn.addEventListener('click', sendMessage);
-userInput.addEventListener('keypress', function(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage();
-    }
-});
-
-voiceInputBtn.addEventListener('click', toggleVoiceRecognition);
-startVoiceBtn.addEventListener('click', startVoiceRecognition);
-stopVoiceBtn.addEventListener('click', stopVoiceRecognition);
-toggleSpeechBtn.addEventListener('click', toggleSpeech);
-newChatBtn.addEventListener('click', startNewChat);
-
-// Sync specialty selectors
-modelSelect.addEventListener('change', function() {
-    mobileModelSelect.value = this.value;
-    updateSpecialty();
-});
-
-mobileModelSelect.addEventListener('change', function() {
-    modelSelect.value = this.value;
-    updateSpecialty();
-});
-
-// Medical tool button event listeners
-symptomCheckerBtn.addEventListener('click', function() {
-    if (!isChatStarted) {
-        alert("Please complete the setup first.");
-        return;
-    }
-    addMessage("I'd like to use the symptom checker. What symptoms should I describe?", true);
-    setTimeout(() => {
-        addMessage("Of course. Please describe all your symptoms in detail, including when they started, their severity, and any factors that make them better or worse.", false);
-        if (isSpeechEnabled) {
-            speakResponse("Of course. Please describe all your symptoms in detail, including when they started, their severity, and any factors that make them better or worse.");
-        }
-    }, 500);
-});
-
-healthTrackerBtn.addEventListener('click', function() {
-    if (!isChatStarted) {
-        alert("Please complete the setup first.");
-        return;
-    }
-    addMessage("I want to track my health data.", true);
-    setTimeout(() => {
-        addMessage("Excellent. I can help you track various health metrics. Please share your current vitals like blood pressure, heart rate, weight, or any medications you're taking. You can also ask me to set reminders for medications or appointments.", false);
-        if (isSpeechEnabled) {
-            speakResponse("Excellent. I can help you track various health metrics. Please share your current vitals like blood pressure, heart rate, weight, or any medications you're taking.");
-        }
-    }, 500);
-});
-
-diagnosticAssistantBtn.addEventListener('click', function() {
-    if (!isChatStarted) {
-        alert("Please complete the setup first.");
-        return;
-    }
-    addMessage("I need help interpreting diagnostic results.", true);
-    setTimeout(() => {
-        addMessage("I can assist with understanding lab results or diagnostic reports. Please share the details of your test results, and I'll help explain what they might indicate. Remember, I can provide information but not medical diagnoses.", false);
-        if (isSpeechEnabled) {
-            speakResponse("I can assist with understanding lab results or diagnostic reports. Please share the details of your test results, and I'll help explain what they might indicate.");
-        }
-    }, 500);
-});
-
-preventiveCareBtn.addEventListener('click', function() {
-    if (!isChatStarted) {
-        alert("Please complete the setup first.");
-        return;
-    }
-    addMessage("I'd like preventive health advice.", true);
-    setTimeout(() => {
-        addMessage("Preventive care is essential for long-term health. Tell me about your lifestyle - diet, exercise, sleep patterns, stress levels, and any family medical history. I'll provide personalized recommendations for maintaining your health.", false);
-        if (isSpeechEnabled) {
-            speakResponse("Preventive care is essential for long-term health. Tell me about your lifestyle - diet, exercise, sleep patterns, stress levels, and any family medical history.");
-        }
-    }, 500);
-});
-
-medicationBtn.addEventListener('click', function() {
-    if (!isChatStarted) {
-        alert("Please complete the setup first.");
-        return;
-    }
-    addMessage("I have questions about medications.", true);
-    setTimeout(() => {
-        addMessage("I can provide information about medications, their uses, side effects, and interactions. Please tell me which medication you're asking about or describe your medication concerns. Remember to always consult with a healthcare provider before making any changes to your medications.", false);
-        if (isSpeechEnabled) {
-            speakResponse("I can provide information about medications, their uses, side effects, and interactions. Please tell me which medication you're asking about or describe your medication concerns.");
-        }
-    }, 500);
-});
-
-// Functions
-function startChat() {
-    const userName = userNameInput.value.trim();
-    const userAge = userAgeInput.value.trim();
-    const userGender = userGenderSelect.value;
-    const userSpecialty = userSpecialtySelect.value;
-    
-    if (!userName) {
-        alert("Please enter your name to begin.");
-        return;
-    }
-    
-    if (!userAge) {
-        alert("Please enter your age for personalized medical advice.");
-        return;
-    }
-    
-    if (!userGender) {
-        alert("Please select your gender for appropriate medical guidance.");
-        return;
-    }
-    
-    // Set the specialty based on user selection
-    modelSelect.value = userSpecialty;
-    mobileModelSelect.value = userSpecialty;
-    
-    try {
-        // Create user in database (simulated)
-        currentUser = {
-            id: 1,
-            name: userName,
-            age: parseInt(userAge),
-            gender: userGender
-        };
-        
-        // Create a new session (simulated)
-        currentSessionId = Date.now();
-        
-        // Hide welcome screen
-        welcomeScreen.style.display = 'none';
-        isChatStarted = true;
-        
-        // Set up the system message
-        const systemMessage = createSystemMessage();
-        conversationHistoryData = [systemMessage];
-        
-        // Add initial greeting from Dr. GenZ
-        addMessage(getInitialGreeting(), false);
-        
-        // Speak the greeting if speech is enabled
-        if (isSpeechEnabled) {
-            speakResponse(getInitialGreeting());
-        }
-        
-        statusText.textContent = `Consulting with ${userName}`;
-        
-        // Update specialty indicator
-        updateSpecialty();
-        
-    } catch (error) {
-        console.error('Failed to start chat:', error);
-        alert('Failed to initialize chat. Please try again.');
-    }
-}
-
-function updateSpecialty() {
-    const specialty = modelSelect.value;
-    let specialtyText = '';
-    
-    switch(specialty) {
-        case 'general':
-            specialtyText = 'General Medicine';
-            break;
-        case 'pediatrics':
-            specialtyText = 'Pediatrics';
-            break;
-        case 'cardiology':
-            specialtyText = 'Cardiology';
-            break;
-        case 'dermatology':
-            specialtyText = 'Dermatology';
-            break;
-        case 'mental':
-            specialtyText = 'Mental Health';
-            break;
-    }
-    
-    specialtyIndicator.textContent = specialtyText;
-    
-    if (isChatStarted) {
-        conversationHistoryData[0] = createSystemMessage();
-        addMessage(`I've switched to ${specialtyText} mode. How can I assist you with your health concerns?`, false);
-        
-        if (isSpeechEnabled) {
-            speakResponse(`I've switched to ${specialtyText} mode. How can I assist you with your health concerns?`);
-        }
-    }
-}
+// ============================================
+// CORE FUNCTIONS - Defined First
+// ============================================
 
 function createSystemMessage() {
-    const specialty = modelSelect.value;
+    if (!currentUser) return null;
+    
+    const specialty = modelSelect ? modelSelect.value : 'general';
     let specialtyFocus = '';
     
     switch(specialty) {
@@ -404,7 +83,7 @@ function createSystemMessage() {
     
     return {
         role: "system",
-        content: `You are Dr. GenZ, an AI medical assistant designed to provide health information and guidance.
+        content: `You are Dr. GenZ, an AI medical assistant designed to provide health information, emotional support and guidance.
         The user is ${currentUser.name}, ${currentUser.age} years old, who identifies as ${currentUser.gender}.
         
         ${specialtyFocus}
@@ -417,6 +96,23 @@ function createSystemMessage() {
           emotional well-being, mental health, psychology, lifestyle factors affecting health
         - DO NOT answer questions about: coding, technology, programming, math, science (unless medical science),
           history, politics, entertainment, sports, or any other non-medical topics
+
+           PERSONALITY: You are warm, empathetic, supportive, and engaging. You're not just clinical - you genuinely care about people's well-being. You use conversational language, show emotional intelligence, and build rapport with users.
+
+           COUNSELING & GUIDANCE APPROACH:
+        - For emotional issues: "How has that been affecting your daily life?"
+        - For motivation: "What's one small step you could take today?"
+        - For anxiety: "Let's break this down together. What's the smallest part you can tackle?"
+        - For loneliness: "Many people feel this way. Would you like to talk about what might help you feel more connected?"
+        - For stress: "What usually helps you feel more centered? Even 5 minutes of deep breathing can help."
+        
+        CONVERSATION STARTERS & ENGAGEMENT:
+        - "How have you been feeling lately, not just physically but emotionally?"
+        - "What's been on your mind health-wise recently?"
+        - "Tell me more about that - I'm here to listen."
+        - "That's really insightful. What do you think would help most right now?"
+        - "I appreciate you sharing that with me. It takes courage to talk about health concerns."
+
         
         Your role is to:
         - Provide general health information and education
@@ -444,6 +140,8 @@ function createSystemMessage() {
 }
 
 function getInitialGreeting() {
+    if (!currentUser) return "Hello! I'm Dr. GenZ. How can I assist you with your health concerns today?";
+    
     const age = parseInt(currentUser.age);
     let ageGroup = '';
     
@@ -461,87 +159,9 @@ function getInitialGreeting() {
     return greetings[Math.floor(Math.random() * greetings.length)];
 }
 
-function toggleVoiceRecognition() {
-    if (!SpeechRecognition) {
-        statusText.textContent = "Speech recognition not supported in your browser";
-        return;
-    }
-    
-    if (isListening) {
-        recognition.stop();
-    } else {
-        userInput.value = '';
-        userInput.dispatchEvent(new Event('input'));
-        recognition.start();
-    }
-}
-
-function startVoiceRecognition() {
-    if (!SpeechRecognition) {
-        statusText.textContent = "Speech recognition not supported in your browser";
-        return;
-    }
-    
-    userInput.value = '';
-    userInput.dispatchEvent(new Event('input'));
-    recognition.start();
-}
-
-function stopVoiceRecognition() {
-    if (isListening) {
-        recognition.stop();
-    }
-}
-
-function toggleSpeech() {
-    // If speech is currently playing, stop it
-    if (window.speechSynthesis.speaking) {
-        stopTalking();
-        return;
-    }
-    
-    // Otherwise, toggle speech on/off as before
-    isSpeechEnabled = !isSpeechEnabled;
-    toggleSpeechBtn.querySelector('.voice-btn-text').textContent = 
-        `Voice: ${isSpeechEnabled ? 'ON' : 'OFF'}`;
-    toggleSpeechBtn.style.backgroundColor = isSpeechEnabled ? '' : 'var(--text-muted)';
-    
-    // Update icon
-    const icon = toggleSpeechBtn.querySelector('i');
-    if (isSpeechEnabled) {
-        icon.classList.remove('fa-volume-mute');
-        icon.classList.add('fa-volume-up');
-    } else {
-        icon.classList.remove('fa-volume-up');
-        icon.classList.add('fa-volume-mute');
-    }
-}
-
-// Function to stop AI speech
-function stopTalking() {
-    if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        statusText.textContent = "Speech stopped";
-        
-        // Reset UI states
-        hideTypingIndicator();
-        sendBtn.disabled = false;
-        
-        // Show feedback that speech was stopped
-        const feedback = document.createElement('div');
-        feedback.className = 'system-message';
-        feedback.textContent = "Speech stopped";
-        messagesContainer.appendChild(feedback);
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        
-        // Clear feedback after 2 seconds
-        setTimeout(() => {
-            statusText.textContent = "Waiting for your response";
-        }, 2000);
-    }
-}
-
 function addMessage(message, isUser = false) {
+    if (!messagesContainer) return;
+    
     const messageDiv = document.createElement('div');
     messageDiv.classList.add('message');
     messageDiv.classList.add(isUser ? 'user-message' : 'bot-message');
@@ -549,10 +169,10 @@ function addMessage(message, isUser = false) {
     if (isUser) {
         messageDiv.innerHTML = `
             <div class="message-content">
-                <div class="message-sender">${currentUser.name}</div>
+                <div class="message-sender">${currentUser ? currentUser.name : 'User'}</div>
                 <div>${message}</div>
             </div>
-            <div class="message-avatar user-avatar">${currentUser.name.charAt(0)}</div>
+            <div class="message-avatar user-avatar">${currentUser ? currentUser.name.charAt(0) : 'U'}</div>
         `;
     } else {
         // Check if message contains medical alerts
@@ -579,13 +199,288 @@ function addMessage(message, isUser = false) {
 }
 
 function showTypingIndicator() {
-    typingIndicator.style.display = 'flex';
-    statusDot.classList.add('thinking');
+    if (typingIndicator) {
+        typingIndicator.style.display = 'flex';
+        statusDot.classList.add('thinking');
+    }
 }
 
 function hideTypingIndicator() {
-    typingIndicator.style.display = 'none';
-    statusDot.classList.remove('thinking');
+    if (typingIndicator) {
+        typingIndicator.style.display = 'none';
+        statusDot.classList.remove('thinking');
+    }
+}
+
+function updateSpecialty() {
+    if (!specialtyIndicator) return;
+    
+    const specialty = modelSelect ? modelSelect.value : 'general';
+    let specialtyText = '';
+    
+    switch(specialty) {
+        case 'general':
+            specialtyText = 'General Medicine';
+            break;
+        case 'pediatrics':
+            specialtyText = 'Pediatrics';
+            break;
+        case 'cardiology':
+            specialtyText = 'Cardiology';
+            break;
+        case 'dermatology':
+            specialtyText = 'Dermatology';
+            break;
+        case 'mental':
+            specialtyText = 'Mental Health';
+            break;
+    }
+    
+    specialtyIndicator.textContent = specialtyText;
+    
+    if (isChatStarted) {
+        const systemMsg = createSystemMessage();
+        if (systemMsg) {
+            conversationHistoryData[0] = systemMsg;
+            addMessage(`I've switched to ${specialtyText} mode. How can I assist you with your health concerns?`, false);
+            
+            if (isSpeechEnabled) {
+                speakResponse(`I've switched to ${specialtyText} mode. How can I assist you with your health concerns?`);
+            }
+        }
+    }
+}
+
+function speakResponse(text) {
+    if ('speechSynthesis' in window && isSpeechEnabled) {
+        // Stop any ongoing speech
+        window.speechSynthesis.cancel();
+        
+        const cleanText = text.replace(/[#*\[\]_`]/g, '');
+        const utterance = new SpeechSynthesisUtterance(cleanText);
+        
+        utterance.rate = 0.9;
+        utterance.pitch = 1.0;
+        utterance.volume = 0.8;
+        
+        utterance.onstart = function() {
+            if (statusText) statusText.textContent = "Dr. GenZ is speaking...";
+            // Change button to show stop functionality
+            if (toggleSpeechBtn) {
+                toggleSpeechBtn.querySelector('.voice-btn-text').textContent = 'Stop Speech';
+                const icon = toggleSpeechBtn.querySelector('i');
+                icon.classList.remove('fa-volume-up');
+                icon.classList.add('fa-stop');
+            }
+        };
+        
+        utterance.onend = function() {
+            if (statusText) statusText.textContent = "Waiting for your response";
+            if (statusDot) statusDot.classList.remove('thinking');
+            if (voiceInputBtn) voiceInputBtn.style.color = "";
+            if (userInput) userInput.focus();
+            hideTypingIndicator();
+            if (sendBtn) sendBtn.disabled = false;
+            
+            // Reset button to normal state
+            if (toggleSpeechBtn && isSpeechEnabled) {
+                toggleSpeechBtn.querySelector('.voice-btn-text').textContent = 'Voice: ON';
+                const icon = toggleSpeechBtn.querySelector('i');
+                icon.classList.remove('fa-stop');
+                icon.classList.add('fa-volume-up');
+            }
+        };
+        
+        utterance.onerror = function(event) {
+            console.error("Speech synthesis error:", event);
+            if (statusText) statusText.textContent = "Voice issue, but I've processed your request";
+            hideTypingIndicator();
+            if (sendBtn) sendBtn.disabled = false;
+            
+            // Reset button on error
+            if (toggleSpeechBtn && isSpeechEnabled) {
+                toggleSpeechBtn.querySelector('.voice-btn-text').textContent = 'Voice: ON';
+                const icon = toggleSpeechBtn.querySelector('i');
+                icon.classList.remove('fa-stop');
+                icon.classList.add('fa-volume-up');
+            }
+        };
+        
+        window.speechSynthesis.speak(utterance);
+    } else {
+        if (statusText) statusText.textContent = "Waiting for your response";
+        if (statusDot) statusDot.classList.remove('thinking');
+        if (userInput) userInput.focus();
+        hideTypingIndicator();
+        if (sendBtn) sendBtn.disabled = false;
+    }
+}
+
+function stopTalking() {
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        if (statusText) statusText.textContent = "Speech stopped";
+        
+        // Reset UI states
+        hideTypingIndicator();
+        if (sendBtn) sendBtn.disabled = false;
+        
+        // Show feedback that speech was stopped
+        if (messagesContainer) {
+            const feedback = document.createElement('div');
+            feedback.className = 'system-message';
+            feedback.textContent = "Speech stopped";
+            messagesContainer.appendChild(feedback);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        // Clear feedback after 2 seconds
+        setTimeout(() => {
+            if (statusText) statusText.textContent = "Waiting for your response";
+        }, 2000);
+    }
+}
+
+function toggleSpeech() {
+    // If speech is currently playing, stop it
+    if (window.speechSynthesis.speaking) {
+        stopTalking();
+        return;
+    }
+    
+    // Otherwise, toggle speech on/off as before
+    isSpeechEnabled = !isSpeechEnabled;
+    if (toggleSpeechBtn) {
+        toggleSpeechBtn.querySelector('.voice-btn-text').textContent = 
+            `Voice: ${isSpeechEnabled ? 'ON' : 'OFF'}`;
+        toggleSpeechBtn.style.backgroundColor = isSpeechEnabled ? '' : 'var(--text-muted)';
+        
+        // Update icon
+        const icon = toggleSpeechBtn.querySelector('i');
+        if (isSpeechEnabled) {
+            icon.classList.remove('fa-volume-mute');
+            icon.classList.add('fa-volume-up');
+        } else {
+            icon.classList.remove('fa-volume-up');
+            icon.classList.add('fa-volume-mute');
+        }
+    }
+}
+
+// Initialize voice visualization bars
+function initializeVoiceVisualizer() {
+    if (voiceVisualizer) {
+        voiceBars = Array.from(voiceVisualizer.querySelectorAll('.voice-bar'));
+    }
+}
+
+// Update voice visualization
+function updateVoiceVisualization(volume) {
+    if (!isVoiceActive) return;
+    
+    voiceBars.forEach((bar, index) => {
+        const shouldBeActive = index < Math.floor(volume / 10);
+        if (shouldBeActive) {
+            bar.classList.add('active');
+            bar.style.height = `${10 + (index * 5)}px`;
+        } else {
+            bar.classList.remove('active');
+            bar.style.height = '4px';
+        }
+    });
+}
+
+// Mobile sidebar toggle
+function toggleSidebar() {
+    isSidebarOpen = !isSidebarOpen;
+    if (sidebar) sidebar.classList.toggle('open', isSidebarOpen);
+    if (sidebarOverlay) sidebarOverlay.classList.toggle('active', isSidebarOpen);
+    
+    // Update menu icon
+    if (mobileMenuBtn) {
+        const menuIcon = mobileMenuBtn.querySelector('i');
+        if (isSidebarOpen) {
+            menuIcon.classList.remove('fa-bars');
+            menuIcon.classList.add('fa-times');
+        } else {
+            menuIcon.classList.remove('fa-times');
+            menuIcon.classList.add('fa-bars');
+        }
+    }
+}
+
+// ============================================
+// MAIN CHAT FUNCTIONS
+// ============================================
+
+function startChat() {
+    const userName = userNameInput.value.trim();
+    const userAge = userAgeInput.value.trim();
+    const userGender = userGenderSelect.value;
+    const userSpecialty = userSpecialtySelect.value;
+    
+    if (!userName) {
+        alert("Please enter your name to begin.");
+        return;
+    }
+    
+    if (!userAge) {
+        alert("Please enter your age for personalized medical advice.");
+        return;
+    }
+    
+    if (!userGender) {
+        alert("Please select your gender for appropriate medical guidance.");
+        return;
+    }
+    
+    // Set the specialty based on user selection
+    if (modelSelect) modelSelect.value = userSpecialty;
+    if (mobileModelSelect) mobileModelSelect.value = userSpecialty;
+    
+    try {
+        // Create user in database (simulated)
+        currentUser = {
+            id: 1,
+            name: userName,
+            age: parseInt(userAge),
+            gender: userGender
+        };
+        
+        // Save to localStorage
+        localStorage.setItem("userName", userName);
+        localStorage.setItem("userAge", userAge);
+        localStorage.setItem("userGender", userGender);
+        localStorage.setItem("userSpecialty", userSpecialty);
+        
+        // Create a new session (simulated)
+        currentSessionId = Date.now();
+        
+        // Hide welcome screen
+        if (welcomeScreen) welcomeScreen.style.display = 'none';
+        isChatStarted = true;
+        
+        // Set up the system message
+        const systemMessage = createSystemMessage();
+        conversationHistoryData = [systemMessage];
+        
+        // Add initial greeting from Dr. GenZ
+        addMessage(getInitialGreeting(), false);
+        
+        // Speak the greeting if speech is enabled
+        if (isSpeechEnabled) {
+            speakResponse(getInitialGreeting());
+        }
+        
+        if (statusText) statusText.textContent = `Consulting with ${userName}`;
+        
+        // Update specialty indicator
+        updateSpecialty();
+        
+    } catch (error) {
+        console.error('Failed to start chat:', error);
+        alert('Failed to initialize chat. Please try again.');
+    }
 }
 
 async function sendMessage() {
@@ -598,11 +493,11 @@ async function sendMessage() {
     if (!message) return;
 
     // Comprehensive medical keywords array
-const medicalKeywords = [
+    const medicalKeywords = [
     // Basic Medical Terms
     'health', 'medicine', 'medical', 'symptom', 'pain', 'doctor', 'hospital',
     'clinic', 'physician', 'nurse', 'patient', 'diagnosis', 'prognosis',
-    'examination', 'checkup', 'having', 'feeling', 'consultation', 'appointment', 'emergency',
+    'examination', 'checkup', 'bored', 'boring', 'having', 'hey', 'guidance', 'counselling', 'who', 'greetings', 'how' , 'feeling', 'consultation', 'appointment', 'emergency',
     
     // Medications & Treatments
     'medication', 'drug', 'pill', 'prescription', 'treatment', 'therapy',
@@ -852,8 +747,8 @@ const medicalKeywords = [
     
     // Show typing indicator
     showTypingIndicator();
-    statusText.textContent = "Dr. GenZ is analyzing your symptoms...";
-    sendBtn.disabled = true;
+    if (statusText) statusText.textContent = "Dr. GenZ is analyzing your symptoms...";
+    if (sendBtn) sendBtn.disabled = true;
     
     try {
         // Update system message with current specialty
@@ -912,9 +807,9 @@ const medicalKeywords = [
         if (isSpeechEnabled) {
             speakResponse(botResponse);
         } else {
-            statusText.textContent = "Waiting for your response";
+            if (statusText) statusText.textContent = "Waiting for your response";
             hideTypingIndicator();
-            sendBtn.disabled = false;
+            if (sendBtn) sendBtn.disabled = false;
         }
         
     } catch (error) {
@@ -930,72 +825,8 @@ const medicalKeywords = [
         
         const randomResponse = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
         addMessage(randomResponse);
-        statusText.textContent = "Connection issue - please try again";
-        sendBtn.disabled = false;
-    }
-}
-
-function speakResponse(text) {
-    if ('speechSynthesis' in window && isSpeechEnabled) {
-        // Stop any ongoing speech
-        window.speechSynthesis.cancel();
-        
-        const cleanText = text.replace(/[#*\[\]_`]/g, '');
-        const utterance = new SpeechSynthesisUtterance(cleanText);
-        
-        utterance.rate = 0.9;
-        utterance.pitch = 1.0;
-        utterance.volume = 0.8;
-        
-        utterance.onstart = function() {
-            statusText.textContent = "Dr. GenZ is speaking...";
-            // Change button to show stop functionality
-            toggleSpeechBtn.querySelector('.voice-btn-text').textContent = 'Stop Speech';
-            const icon = toggleSpeechBtn.querySelector('i');
-            icon.classList.remove('fa-volume-up');
-            icon.classList.add('fa-stop');
-        };
-        
-        utterance.onend = function() {
-            statusText.textContent = "Waiting for your response";
-            statusDot.classList.remove('thinking');
-            voiceInputBtn.style.color = "";
-            isListening = false;
-            userInput.focus();
-            hideTypingIndicator();
-            sendBtn.disabled = false;
-            
-            // Reset button to normal state
-            if (isSpeechEnabled) {
-                toggleSpeechBtn.querySelector('.voice-btn-text').textContent = 'Voice: ON';
-                const icon = toggleSpeechBtn.querySelector('i');
-                icon.classList.remove('fa-stop');
-                icon.classList.add('fa-volume-up');
-            }
-        };
-        
-        utterance.onerror = function(event) {
-            console.error("Speech synthesis error:", event);
-            statusText.textContent = "Voice issue, but I've processed your request";
-            hideTypingIndicator();
-            sendBtn.disabled = false;
-            
-            // Reset button on error
-            if (isSpeechEnabled) {
-                toggleSpeechBtn.querySelector('.voice-btn-text').textContent = 'Voice: ON';
-                const icon = toggleSpeechBtn.querySelector('i');
-                icon.classList.remove('fa-stop');
-                icon.classList.add('fa-volume-up');
-            }
-        };
-        
-        window.speechSynthesis.speak(utterance);
-    } else {
-        statusText.textContent = "Waiting for your response";
-        statusDot.classList.remove('thinking');
-        userInput.focus();
-        hideTypingIndicator();
-        sendBtn.disabled = false;
+        if (statusText) statusText.textContent = "Connection issue - please try again";
+        if (sendBtn) sendBtn.disabled = false;
     }
 }
 
@@ -1005,7 +836,7 @@ function startNewChat() {
         conversationHistoryData = [createSystemMessage()];
         
         // Clear messages container
-        messagesContainer.innerHTML = '';
+        if (messagesContainer) messagesContainer.innerHTML = '';
         
         // Add new greeting
         addMessage("Hello! I'm Dr. GenZ. How can I assist you with your health concerns today?", false);
@@ -1016,20 +847,359 @@ function startNewChat() {
     }
 }
 
-// Add keyboard shortcut (Esc key) to stop speech
+// ============================================
+// INITIALIZATION & AUTO-START
+// ============================================
+
+function initializeApp() {
+    // Auto-resize textarea
+    if (userInput) {
+        userInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+    }
+
+    // Mobile sidebar toggle
+    if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', toggleSidebar);
+    if (sidebarOverlay) sidebarOverlay.addEventListener('click', toggleSidebar);
+
+    // Close sidebar when clicking on a history item (mobile)
+    document.querySelectorAll('.history-item').forEach(item => {
+        item.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                toggleSidebar();
+            }
+        });
+    });
+
+    // Speech Recognition Setup
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition;
+    let isListening = false;
+
+    if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = true;
+        recognition.lang = 'en-US';
+        
+        recognition.onstart = function() {
+            if (statusText) statusText.textContent = "Listening... Please describe your symptoms";
+            if (voiceInputBtn) voiceInputBtn.style.color = "#ef4444";
+            if (startVoiceBtn) startVoiceBtn.classList.add('active');
+            if (stopVoiceBtn) stopVoiceBtn.disabled = false;
+            isListening = true;
+            isVoiceActive = true;
+            if (voiceVisualizer) voiceVisualizer.style.display = 'flex';
+            if (voiceRecordingIndicator) voiceRecordingIndicator.style.display = 'block';
+        };
+        
+        recognition.onresult = function(event) {
+            const transcript = Array.from(event.results)
+                .map(result => result[0])
+                .map(result => result.transcript)
+                .join('');
+            
+            if (userInput) {
+                userInput.value = transcript;
+                userInput.dispatchEvent(new Event('input'));
+            }
+            
+            // Simulate voice visualization based on transcript length
+            const volume = Math.min(100, transcript.length * 2);
+            updateVoiceVisualization(volume);
+        };
+        
+        recognition.onerror = function(event) {
+            console.error("Speech recognition error:", event.error);
+            if (statusText) statusText.textContent = "Error: " + event.error;
+            if (voiceInputBtn) voiceInputBtn.style.color = "";
+            if (startVoiceBtn) startVoiceBtn.classList.remove('active');
+            if (stopVoiceBtn) stopVoiceBtn.disabled = true;
+            isListening = false;
+            isVoiceActive = false;
+            if (voiceVisualizer) voiceVisualizer.style.display = 'none';
+            if (voiceRecordingIndicator) voiceRecordingIndicator.style.display = 'none';
+        };
+        
+        recognition.onend = function() {
+            if (isListening) {
+                if (statusText) statusText.textContent = "Processing your symptoms...";
+                if (voiceInputBtn) voiceInputBtn.style.color = "";
+                if (startVoiceBtn) startVoiceBtn.classList.remove('active');
+                if (stopVoiceBtn) stopVoiceBtn.disabled = true;
+                isListening = false;
+                isVoiceActive = false;
+                if (voiceVisualizer) voiceVisualizer.style.display = 'none';
+                if (voiceRecordingIndicator) voiceRecordingIndicator.style.display = 'none';
+                
+                // Auto-send if there's text
+                if (userInput && userInput.value.trim()) {
+                    setTimeout(() => {
+                        sendMessage();
+                    }, 500);
+                }
+            }
+        };
+        
+        // Speech control functions
+        function toggleVoiceRecognition() {
+            if (!SpeechRecognition) {
+                if (statusText) statusText.textContent = "Speech recognition not supported in your browser";
+                return;
+            }
+            
+            if (isListening) {
+                recognition.stop();
+            } else {
+                if (userInput) {
+                    userInput.value = '';
+                    userInput.dispatchEvent(new Event('input'));
+                }
+                recognition.start();
+            }
+        }
+        
+        function startVoiceRecognition() {
+            if (!SpeechRecognition) {
+                if (statusText) statusText.textContent = "Speech recognition not supported in your browser";
+                return;
+            }
+            
+            if (userInput) {
+                userInput.value = '';
+                userInput.dispatchEvent(new Event('input'));
+            }
+            recognition.start();
+        }
+        
+        function stopVoiceRecognition() {
+            if (isListening) {
+                recognition.stop();
+            }
+        }
+        
+        // Attach voice event listeners
+        if (voiceInputBtn) voiceInputBtn.addEventListener('click', toggleVoiceRecognition);
+        if (startVoiceBtn) startVoiceBtn.addEventListener('click', startVoiceRecognition);
+        if (stopVoiceBtn) stopVoiceBtn.addEventListener('click', stopVoiceRecognition);
+    } else {
+        if (voiceInputBtn) voiceInputBtn.disabled = true;
+        if (startVoiceBtn) startVoiceBtn.disabled = true;
+        if (voiceInputBtn) voiceInputBtn.title = "Speech Recognition not supported in your browser";
+        if (startVoiceBtn) startVoiceBtn.title = "Speech Recognition not supported in your browser";
+    }
+
+    // Event Listeners
+    if (startChatBtn) startChatBtn.addEventListener('click', startChat);
+    if (sendBtn) sendBtn.addEventListener('click', sendMessage);
+    if (userInput) {
+        userInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+    }
+
+    if (toggleSpeechBtn) toggleSpeechBtn.addEventListener('click', toggleSpeech);
+    if (newChatBtn) newChatBtn.addEventListener('click', startNewChat);
+
+    // Sync specialty selectors
+    if (modelSelect) {
+        modelSelect.addEventListener('change', function() {
+            if (mobileModelSelect) mobileModelSelect.value = this.value;
+            updateSpecialty();
+        });
+    }
+
+    if (mobileModelSelect) {
+        mobileModelSelect.addEventListener('change', function() {
+            if (modelSelect) modelSelect.value = this.value;
+            updateSpecialty();
+        });
+    }
+
+    // Medical tool button event listeners
+    const setupMedicalTool = (btn, userMessage, botMessage) => {
+        if (btn) {
+            btn.addEventListener('click', function() {
+                if (!isChatStarted) {
+                    alert("Please complete the setup first.");
+                    return;
+                }
+                addMessage(userMessage, true);
+                setTimeout(() => {
+                    addMessage(botMessage, false);
+                    if (isSpeechEnabled) {
+                        speakResponse(botMessage.split('.')[0] + '.');
+                    }
+                }, 500);
+            });
+        }
+    };
+
+    setupMedicalTool(
+        symptomCheckerBtn,
+        "I'd like to use the symptom checker. What symptoms should I describe?",
+        "Of course. Please describe all your symptoms in detail, including when they started, their severity, and any factors that make them better or worse."
+    );
+
+    setupMedicalTool(
+        healthTrackerBtn,
+        "I want to track my health data.",
+        "Excellent. I can help you track various health metrics. Please share your current vitals like blood pressure, heart rate, weight, or any medications you're taking. You can also ask me to set reminders for medications or appointments."
+    );
+
+    setupMedicalTool(
+        diagnosticAssistantBtn,
+        "I need help interpreting diagnostic results.",
+        "I can assist with understanding lab results or diagnostic reports. Please share the details of your test results, and I'll help explain what they might indicate. Remember, I can provide information but not medical diagnoses."
+    );
+
+    setupMedicalTool(
+        preventiveCareBtn,
+        "I'd like preventive health advice.",
+        "Preventive care is essential for long-term health. Tell me about your lifestyle - diet, exercise, sleep patterns, stress levels, and any family medical history. I'll provide personalized recommendations for maintaining your health."
+    );
+
+    setupMedicalTool(
+        medicationBtn,
+        "I have questions about medications.",
+        "I can provide information about medications, their uses, side effects, and interactions. Please tell me which medication you're asking about or describe your medication concerns. Remember to always consult with a healthcare provider before making any changes to your medications."
+    );
+
+    // Add keyboard shortcut (Esc key) to stop speech
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && isSpeechEnabled) {
+            stopTalking();
+        }
+    });
+
+    // Initialize the voice visualizer
+    initializeVoiceVisualizer();
+
+    // Handle window resize
+    window.addEventListener('resize', function() {
+        // Close sidebar on resize to desktop if open
+        if (window.innerWidth > 768 && isSidebarOpen) {
+            toggleSidebar();
+        }
+    });
+    
+    // Now that everything is initialized, check for saved user data
+    autoStartChat();
+}
+
+function autoStartChat() {
+    // Load saved data
+    const savedName = localStorage.getItem("userName");
+    const savedAge = localStorage.getItem("userAge");
+    const savedGender = localStorage.getItem("userGender");
+    const savedSpecialty = localStorage.getItem("userSpecialty");
+
+    // Populate form fields
+    if (userNameInput && savedName) userNameInput.value = savedName;
+    if (userAgeInput && savedAge) userAgeInput.value = savedAge;
+    if (userGenderSelect && savedGender) userGenderSelect.value = savedGender;
+    if (userSpecialtySelect && savedSpecialty) userSpecialtySelect.value = savedSpecialty;
+
+    // Auto-start chat if all required fields are filled
+    if (savedName && savedAge && savedGender) {
+        // Populate currentUser for the chat system
+        currentUser = {
+            id: 1,
+            name: savedName,
+            age: parseInt(savedAge),
+            gender: savedGender
+        };
+        
+        // Set the specialty based on saved selection
+        if (modelSelect) modelSelect.value = savedSpecialty || 'general';
+        if (mobileModelSelect) mobileModelSelect.value = savedSpecialty || 'general';
+        
+        // Create a new session (simulated)
+        currentSessionId = Date.now();
+        
+        // Hide welcome screen and show chat interface
+        if (welcomeScreen) welcomeScreen.style.display = 'none';
+        isChatStarted = true;
+        
+        // Set up the system message
+        const systemMessage = createSystemMessage();
+        if (systemMessage) {
+            conversationHistoryData = [systemMessage];
+            
+            // Add initial greeting from Dr. GenZ
+            const greeting = getInitialGreeting();
+            addMessage(greeting, false);
+            
+            // Speak the greeting if speech is enabled
+            if (isSpeechEnabled) {
+                speakResponse(greeting);
+            }
+            
+            if (statusText) statusText.textContent = `Consulting with ${savedName}`;
+            
+            // Update specialty indicator
+            updateSpecialty();
+            
+            // Focus on the input field for immediate typing
+            setTimeout(() => {
+                if (userInput) userInput.focus();
+            }, 500);
+            
+            // Add a welcome back message
+            setTimeout(() => {
+                const welcomeBack = `Welcome back, ${savedName}! I have your previous information loaded. How can I assist you today?`;
+                addMessage(welcomeBack, false);
+                if (isSpeechEnabled) {
+                    speakResponse(welcomeBack);
+                }
+            }, 1000);
+        }
+    }
+}
+
+// Save data automatically whenever a field changes
+function saveUserInfo() {
+    if (userNameInput) localStorage.setItem("userName", userNameInput.value);
+    if (userAgeInput) localStorage.setItem("userAge", userAgeInput.value);
+    if (userGenderSelect) localStorage.setItem("userGender", userGenderSelect.value);
+    if (userSpecialtySelect) localStorage.setItem("userSpecialty", userSpecialtySelect.value);
+}
+
+// Add listeners to all fields for auto-save
+if (userNameInput) userNameInput.addEventListener("input", saveUserInfo);
+if (userAgeInput) userAgeInput.addEventListener("input", saveUserInfo);
+if (userGenderSelect) userGenderSelect.addEventListener("change", saveUserInfo);
+if (userSpecialtySelect) userSpecialtySelect.addEventListener("change", saveUserInfo);
+
+// Optional: Save again when clicking "Start Consultation"
+if (startChatBtn) startChatBtn.addEventListener("click", saveUserInfo);
+
+// Initialize the app when DOM is fully loaded
+document.addEventListener('DOMContentLoaded', initializeApp);
+
 document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape' && isSpeechEnabled) {
-        stopTalking();
-    }
-});
+            if (e.ctrlKey && e.key === 'Enter') {
+                document.getElementById('prescription-form').dispatchEvent(new Event('submit'));
+            }
+        });
 
-// Initialize the voice visualizer
-initializeVoiceVisualizer();
+          // Security shortcuts disabled
+  document.addEventListener('contextmenu', function (e) {
+    e.preventDefault();
+  });
 
-// Handle window resize
-window.addEventListener('resize', function() {
-    // Close sidebar on resize to desktop if open
-    if (window.innerWidth > 768 && isSidebarOpen) {
-        toggleSidebar();
+  document.addEventListener('keydown', function (e) {
+    if (
+      e.key === "F12" ||
+      (e.ctrlKey && e.shiftKey && e.key === "I") ||
+      (e.ctrlKey && e.key === "U")
+    ) {
+      e.preventDefault();
+      alert("Action disabled");
     }
-});
+  });
