@@ -5,304 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Privacy Policy - Smart Doctor GenZ</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+    <link rel="stylesheet" href="styles.css">
 
-        :root {
-            --primary: #2a7de1;
-            --primary-dark: #1c5fb3;
-            --secondary: #00c6ab;
-            --light: #f8f9fa;
-            --dark: #212529;
-            --gray: #6c757d;
-            --light-gray: #e9ecef;
-        }
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-MQRXJB1MHN"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-MQRXJB1MHN');
+  document.addEventListener("click", function(e) {
+    let target = e.target.closest("a");
+    if (target && target.hostname !== location.hostname) {
+      gtag("event", "click", {
+        "event_category": "outbound",
+        "event_label": target.href,
+        "transport_type": "beacon"
+      });
+    }
+  });
 
-        body {
-            background-color: #f5f7fa;
-            color: var(--dark);
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        .hero {
-            padding: 80px 0 60px;
-            text-align: center;
-            background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), 
-                        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%232a7de1" opacity="0.05"/></svg>');
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 20px;
-            color: var(--primary);
-        }
-
-        .logo i {
-            font-size: 2.2rem;
-        }
-
-        .hero h1 {
-            font-size: 2.8rem;
-            margin-bottom: 20px;
-            color: var(--primary);
-        }
-
-        .hero p {
-            font-size: 1.2rem;
-            max-width: 700px;
-            margin: 0 auto 30px;
-            color: var(--gray);
-        }
-
-        .privacy-content {
-            padding: 60px 0;
-            background-color: white;
-        }
-
-        .privacy-section {
-            margin-bottom: 50px;
-        }
-
-        .privacy-section:last-child {
-            margin-bottom: 0;
-        }
-
-        .privacy-section h2 {
-            font-size: 1.8rem;
-            color: var(--primary);
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid var(--light-gray);
-        }
-
-        .privacy-section h3 {
-            font-size: 1.4rem;
-            color: var(--dark);
-            margin: 25px 0 15px;
-        }
-
-        .privacy-section p {
-            margin-bottom: 15px;
-            color: var(--gray);
-        }
-
-        .privacy-section ul {
-            margin: 15px 0 15px 30px;
-        }
-
-        .privacy-section li {
-            margin-bottom: 10px;
-            color: var(--gray);
-        }
-
-        .highlight-box {
-            background-color: var(--light);
-            border-left: 4px solid var(--secondary);
-            padding: 20px;
-            margin: 25px 0;
-            border-radius: 0 5px 5px 0;
-        }
-
-        .highlight-box h4 {
-            color: var(--primary);
-            margin-bottom: 10px;
-            font-size: 1.2rem;
-        }
-
-        .data-flow {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 30px 0;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-
-        .data-step {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            max-width: 200px;
-        }
-
-        .step-icon {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 15px;
-            color: white;
-            font-size: 1.5rem;
-        }
-
-        .step-text {
-            font-size: 0.9rem;
-            color: var(--gray);
-        }
-
-        .step-arrow {
-            font-size: 1.5rem;
-            color: var(--primary);
-        }
-
-        .privacy-badges {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin: 40px 0;
-            flex-wrap: wrap;
-        }
-
-        .privacy-badge {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            max-width: 150px;
-        }
-
-        .badge-icon {
-            width: 70px;
-            height: 70px;
-            background: var(--light);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 15px;
-            color: var(--primary);
-            font-size: 1.8rem;
-            border: 2px solid var(--light-gray);
-        }
-
-        .badge-text {
-            font-size: 0.9rem;
-            color: var(--gray);
-            font-weight: 500;
-        }
-
-        .cta-section {
-            padding: 80px 0;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            text-align: center;
-        }
-
-        .cta-section h2 {
-            font-size: 2.2rem;
-            margin-bottom: 20px;
-        }
-
-        .cta-section p {
-            font-size: 1.1rem;
-            max-width: 700px;
-            margin: 0 auto 30px;
-            opacity: 0.9;
-        }
-
-        .cta-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 12px 30px;
-            border-radius: 30px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.3s;
-            display: inline-block;
-        }
-
-        .btn-primary {
-            background-color: white;
-            color: var(--primary);
-        }
-
-        .btn-primary:hover {
-            background-color: var(--light-gray);
-            transform: translateY(-3px);
-        }
-
-        .btn-secondary {
-            background-color: transparent;
-            color: white;
-            border: 2px solid white;
-        }
-
-        .btn-secondary:hover {
-            background-color: white;
-            color: var(--primary);
-            transform: translateY(-3px);
-        }
-
-        @media (max-width: 992px) {
-            .hero h1 {
-                font-size: 2.2rem;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .hero {
-                padding: 60px 0 40px;
-            }
-            
-            .hero h1 {
-                font-size: 1.8rem;
-            }
-            
-            .privacy-content, .cta-section {
-                padding: 40px 0;
-            }
-            
-            .data-flow {
-                flex-direction: column;
-            }
-            
-            .step-arrow {
-                transform: rotate(90deg);
-                margin: 10px 0;
-            }
-            
-            .cta-buttons {
-                flex-direction: column;
-                align-items: center;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .hero h1 {
-                font-size: 1.6rem;
-            }
-            
-            .privacy-section h2 {
-                font-size: 1.5rem;
-            }
-        }
-    </style>
+  window.addEventListener("scroll", function() {
+    let scrollDepth = Math.round((window.scrollY + window.innerHeight) / document.body.scrollHeight * 100);
+    if (scrollDepth >= 25 && !window.scroll25) { gtag("event", "scroll_depth", {percent: 25}); window.scroll25 = true; }
+    if (scrollDepth >= 50 && !window.scroll50) { gtag("event", "scroll_depth", {percent: 50}); window.scroll50 = true; }
+    if (scrollDepth >= 75 && !window.scroll75) { gtag("event", "scroll_depth", {percent: 75}); window.scroll75 = true; }
+    if (scrollDepth >= 100 && !window.scroll100) { gtag("event", "scroll_depth", {percent: 100}); window.scroll100 = true; }
+  });
+</script>
 </head>
 <body>
     <section class="hero">
@@ -464,50 +193,8 @@
             </div>
         </div>
     </section>
-    <script>
-        
-        document.addEventListener('DOMContentLoaded', function() {
-            const privacyBadges = document.querySelectorAll('.privacy-badge');
-            const dataSteps = document.querySelectorAll('.data-step');
-            
-            function checkScroll() {
-                privacyBadges.forEach(badge => {
-                    const badgeTop = badge.getBoundingClientRect().top;
-                    const windowHeight = window.innerHeight;
-                    
-                    if (badgeTop < windowHeight - 100) {
-                        badge.style.opacity = '1';
-                        badge.style.transform = 'translateY(0)';
-                    }
-                });
-                
-                dataSteps.forEach(step => {
-                    const stepTop = step.getBoundingClientRect().top;
-                    const windowHeight = window.innerHeight;
-                    
-                    if (stepTop < windowHeight - 100) {
-                        step.style.opacity = '1';
-                        step.style.transform = 'translateY(0)';
-                    }
-                });
-            }
-            
-            privacyBadges.forEach(badge => {
-                badge.style.opacity = '0';
-                badge.style.transform = 'translateY(20px)';
-                badge.style.transition = 'opacity 0.5s, transform 0.5s';
-            });
-            
-            dataSteps.forEach(step => {
-                step.style.opacity = '0';
-                step.style.transform = 'translateY(20px)';
-                step.style.transition = 'opacity 0.5s, transform 0.5s';
-            });
-            
-            window.addEventListener('scroll', checkScroll);
-            checkScroll(); 
-        });
-
-    </script>
+    <script src="script.js"></script>
+    
 </body>
 </html>
+
