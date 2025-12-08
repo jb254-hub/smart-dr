@@ -16,6 +16,31 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-MQRXJB1MHN"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-MQRXJB1MHN');
+  document.addEventListener("click", function(e) {
+    let target = e.target.closest("a");
+    if (target && target.hostname !== location.hostname) {
+      gtag("event", "click", {
+        "event_category": "outbound",
+        "event_label": target.href,
+        "transport_type": "beacon"
+      });
+    }
+  });
+
+  window.addEventListener("scroll", function() {
+    let scrollDepth = Math.round((window.scrollY + window.innerHeight) / document.body.scrollHeight * 100);
+    if (scrollDepth >= 25 && !window.scroll25) { gtag("event", "scroll_depth", {percent: 25}); window.scroll25 = true; }
+    if (scrollDepth >= 50 && !window.scroll50) { gtag("event", "scroll_depth", {percent: 50}); window.scroll50 = true; }
+    if (scrollDepth >= 75 && !window.scroll75) { gtag("event", "scroll_depth", {percent: 75}); window.scroll75 = true; }
+    if (scrollDepth >= 100 && !window.scroll100) { gtag("event", "scroll_depth", {percent: 100}); window.scroll100 = true; }
+  });
+</script>
 </head>
 
 <body>
@@ -107,6 +132,19 @@
                     <i class="fas fa-handshake"></i>
                     <span>Partnership</span>
                 </a>
+                
+                <a href="YOUR_MEDICATION_TOOLS_LINK_HERE" class="sidebar-link" id="medication-tools-link" target="_blank">
+                    <i class="fas fa-tools"></i>
+                    <span>Medication Tools</span>
+                </a>
+                <a href="YOUR_SMART_PHARMACY_LINK_HERE" class="sidebar-link" id="smart-pharmacy-link" target="_blank">
+                    <i class="fas fa-prescription-bottle-alt"></i>
+                    <span>Smart Pharmacy</span>
+                </a>
+                <a href="YOUR_DOCTORS_PLAZA_LINK_HERE" class="sidebar-link" id="doctors-plaza-link" target="_blank">
+                    <i class="fas fa-hospital"></i>
+                    <span>Doctors Plaza</span>
+                </a>
             </div>
             
             <div class="sidebar-footer">
@@ -152,26 +190,18 @@
             </div>
             
             <div class="medical-tools">
-                <button class="tool-btn" id="symptom-checker-btn">
-                    <i class="fas fa-stethoscope"></i>
-                    <span>Symptom Checker</span>
-                </button>
-                <button class="tool-btn" id="health-tracker-btn">
-                    <i class="fas fa-heartbeat"></i>
-                    <span>Health Tracker</span>
-                </button>
-                <button class="tool-btn" id="diagnostic-assistant-btn">
-                    <i class="fas fa-microscope"></i>
-                    <span>Diagnostic Assistant</span>
-                </button>
-                <button class="tool-btn" id="preventive-care-btn">
-                    <i class="fas fa-shield-alt"></i>
-                    <span>Preventive Care</span>
-                </button>
-                <button class="tool-btn" id="medication-btn">
-                    <i class="fas fa-pills"></i>
-                    <span>Medications</span>
-                </button>
+                <a href="YOUR_MEDICATION_TOOLS_LINK_HERE" class="tool-btn" id="medication-tools-btn" target="_blank">
+                    <i class="fas fa-tools"></i>
+                    <span>Medication Tools</span>
+                </a>
+                <a href="YOUR_SMART_PHARMACY_LINK_HERE" class="tool-btn" id="smart-pharmacy-btn" target="_blank">
+                    <i class="fas fa-prescription-bottle-alt"></i>
+                    <span>Smart Pharmacy</span>
+                </a>
+                <a href="YOUR_DOCTORS_PLAZA_LINK_HERE" class="tool-btn" id="doctors-plaza-btn" target="_blank">
+                    <i class="fas fa-hospital"></i>
+                    <span>Doctors Plaza</span>
+                </a>
             </div>
             
             <div class="input-container">
@@ -232,7 +262,6 @@
             </div>
         </div>
     </div>
-
 
     <script src="script.js"></script>
 </body>
