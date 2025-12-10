@@ -1,4 +1,4 @@
-// API Configuration
+// API Configuratio
 const API_BASE_URL = 'http://localhost:3000/api'; // Change this to your backend URL
 
 // DOM Elements
@@ -756,7 +756,7 @@ async function sendMessage() {
         
         // Call Groq API
         const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
-        const API_KEY = "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";
+        const API_KEY = "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";
         
         const response = await fetch(GROQ_API_URL, {
             method: "POST",
