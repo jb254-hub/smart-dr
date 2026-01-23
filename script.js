@@ -756,7 +756,7 @@ async function sendMessage() {
         
         // Call Groq API
         const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
-        const API_KEY = "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";
+        const API_KEY = "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";
         
         const response = await fetch(GROQ_API_URL, {
             method: "POST",
