@@ -140,17 +140,6 @@
         // Pre-populate form with sample data for demo purposes
         document.addEventListener('DOMContentLoaded', function() {
             // Sample data for demo
-            document.getElementById('full-name').value = 'John Smith';
-            document.getElementById('email').value = 'john.smith@example.com';
-            document.getElementById('phone').value = '+1 (555) 123-4567';
-            document.getElementById('address').value = '123 Main Street, Apt 4B, New York, NY 10001';
-            document.getElementById('medicine').value = 'Amoxicillin';
-            document.getElementById('dosage').value = '500mg';
-            document.getElementById('quantity').value = '30';
-            document.getElementById('frequency').value = 'Twice daily';
-            document.getElementById('prescription-details').value = 'Prescribed by Dr. Sarah Johnson from City Medical Center for bacterial sinus infection. Take one capsule every 12 hours for 15 days.';
-            document.getElementById('delivery-time').value = 'Evening (4 PM - 8 PM)';
-            document.getElementById('notes').value = 'Please deliver between 4-6 PM. Ring doorbell twice. Leave package with concierge if not home.';
             
             // Show demo instructions
             setTimeout(() => {
