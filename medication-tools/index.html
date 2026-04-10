@@ -1,117 +1,101 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smartdr Genz Medication Tools </title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>SmartDoctor GenZ | Pro Trading Floor</title>
     <link rel="stylesheet" href="styles.css">
-
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-MQRXJB1MHN"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-MQRXJB1MHN');
-  document.addEventListener("click", function(e) {
-    let target = e.target.closest("a");
-    if (target && target.hostname !== location.hostname) {
-      gtag("event", "click", {
-        "event_category": "outbound",
-        "event_label": target.href,
-        "transport_type": "beacon"
-      });
-    }
-  });
-
-  window.addEventListener("scroll", function() {
-    let scrollDepth = Math.round((window.scrollY + window.innerHeight) / document.body.scrollHeight * 100);
-    if (scrollDepth >= 25 && !window.scroll25) { gtag("event", "scroll_depth", {percent: 25}); window.scroll25 = true; }
-    if (scrollDepth >= 50 && !window.scroll50) { gtag("event", "scroll_depth", {percent: 50}); window.scroll50 = true; }
-    if (scrollDepth >= 75 && !window.scroll75) { gtag("event", "scroll_depth", {percent: 75}); window.scroll75 = true; }
-    if (scrollDepth >= 100 && !window.scroll100) { gtag("event", "scroll_depth", {percent: 100}); window.scroll100 = true; }
-  });
-</script>
 
 </head>
 <body>
-    <div class="notification-card">
-        <div class="header">
-            <h1><i class="fas fa-pills"></i> Good News!</h1>
-            <p>Medication Tools Are Coming Sooner Than Expected</p>
-            <div class="badge">
-                <i class="fas fa-bolt"></i> Ahead of Schedule!
-            </div>
+<div id="authContainer" class="app" style="justify-content: center; align-items: center; background: radial-gradient(circle at 30% 20%, #0A0F1E, #000000);">
+    <div style="background: rgba(10, 16, 28, 0.95); backdrop-filter: blur(20px); padding: 48px; border-radius: 60px; width: 400px; text-align: center; border: 1px solid #2DD4BF60; box-shadow: 0 25px 45px -12px black;">
+        <div class="logo" style="justify-content: center; margin-bottom: 20px;">🧠 SmartDoctor GenZ</div>
+        <p style="margin-bottom: 24px; color:#94A3D0;">🔐 Institutional Trading Portal</p>
+        <input type="text" id="loginUsername" placeholder="Username" autocomplete="off" style="margin-top: 10px;">
+        <input type="password" id="loginPassword" placeholder="Password">
+        <button id="doLoginBtn" style="margin-top: 24px; width: 100%;">Access Vault →</button>
+        <p id="loginError" style="color:#FF6B6B; margin-top: 20px; font-size:0.8rem;"></p>
+        <div style="margin-top: 28px; font-size: 0.7rem; color: #5E7399;">Authorized personnel only • Regulated by KCMA</div>
+    </div>
+</div>
+
+<div id="dashboardApp" style="display: none;">
+    <div class="app">
+        <div class="sidebar">
+            <div class="logo">📊 SDGZ <span style="font-size:0.7rem;">Pro+</span></div>
+            <div class="nav-item active" data-section="overview">🏦 Market Overview</div>
+            <div class="nav-item" data-section="market">📈 Live Charts & Tickers</div>
+            <div class="nav-item" data-section="portfolio">💼 Portfolio Vault</div>
+            <div class="nav-item" data-section="rewards">🎁 Performance Hub</div>
+            <div class="nav-item" data-section="trade">🔄 Trade Desk</div>
+            <div class="nav-item" id="logoutBtn">🚪 Exit / Logout</div>
         </div>
-        
-        <div class="content">
-            <p class="message">
-                Thanks to the great progress from our team, the <strong>launch is ahead of schedule!</strong> 
-                The tools you've been waiting for to track and manage medications will be in your hands 
-                sooner than we initially thought.
-            </p>
-            
-            <div class="features">
-                <div class="feature">
-                    <div class="feature-icon">
-                        <i class="fas fa-calendar-check"></i>
-                    </div>
-                    <h3>Smart Reminders</h3>
-                    <p>Customizable alerts to never miss a dose again. Set reminders that work with your schedule.</p>
+        <div class="main-content">
+            <div class="top-bar">
+                <div style="display: flex; gap: 12px; align-items: center;"><span>🏥 SMARTDOCTOR GENZ SHARES EXCHANGE</span><span style="font-size:0.7rem; background:#00000060; padding:4px 12px; border-radius:20px;">LIVE</span></div>
+                <div class="username-badge" id="dashboardUser">User</div>
+            </div>
+            <div id="overviewSection" class="dashboard-section">
+                <div class="grid-cards">
+                    <div class="stat-card"><div class="stat-title">🔬 SmartDoctor GenZ (SDGZ)</div><div class="stat-value" id="livePrice">2.00</div><span>KES / share</span><div id="priceChangeIndicator" style="font-size:0.8rem; margin-top:6px;">↻</div></div>
+                    <div class="stat-card"><div class="stat-title">📦 My Holdings</div><div class="stat-value" id="userShares">0</div><span>shares owned</span></div>
+                    <div class="stat-card"><div class="stat-title">💰 Total Liquidity Value</div><div class="stat-value" id="portfolioValue">0</div><span>Kenyan Shillings</span></div>
+                    <div class="stat-card"><div class="stat-title">📊 24h Market Volume</div><div class="stat-value">2.45M</div><span>shares</span></div>
                 </div>
-                
-                <div class="feature">
-                    <div class="feature-icon">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
-                    <h3>Tracking Insights</h3>
-                    <p>Visualize your medication history with easy-to-read charts and progress reports.</p>
+                <div class="fake-news" id="breakingNewsFeed">📡 LIVE: SmartDoctor GenZ secures patent for AI radiology — stock momentum building.</div>
+                <div class="section-card"><h3>⚡ Market Sentiment & Alerts</h3><div id="newsFlash" style="font-size:0.9rem; margin-top: 10px;">Loading macro feeds...</div></div>
+            </div>
+
+            <!-- MARKET & GRAPH SECTION -->
+            <div id="marketSection" class="dashboard-section" style="display:none;">
+                <div class="section-card">
+                    <div class="flex-between"><h3>📉 SmartDoctor GenZ Real-Time Price Action</h3><span id="priceLiveLabel" style="font-family:monospace; font-weight:800;">2.00 KES</span></div>
+                    <canvas id="stockCanvas" width="900" height="400" style="width:100%; height:auto; background:#05080F;"></canvas>
+                    <div class="flex-between" style="margin-top: 20px;"><span>🔄 Auto-update: every 2.8s • Algorithmic feed</span><span>📈 + Multi-asset index</span></div>
                 </div>
-                
-                <div class="feature">
-                    <div class="feature-icon">
-                        <i class="fas fa-list-alt"></i>
+                <div class="section-card"><h3>🏛️ Correlated Assets & Sector Watch</h3><div id="multiStockList" class="grid-cards" style="grid-template-columns:repeat(2,1fr);"></div></div>
+            </div>
+
+            <!-- PORTFOLIO SECTION -->
+            <div id="portfolioSection" class="dashboard-section" style="display:none;">
+                <div class="section-card"><h3>📁 My Equity Statement</h3><div id="portfolioDetails"></div><hr style="margin:20px 0; border-color:#2A3456;"><div id="transactionHistory" class="log-area">📜 Trade & activity ledger will appear here</div></div>
+            </div>
+            <div id="rewardsSection" class="dashboard-section" style="display:none;">
+                <div class="section-card"><h3>🏆 Employee Bonus & Traction Program</h3>
+                    <p style="margin-bottom: 12px;">🔗 Submit any link (Twitter, LinkedIn, TikTok) where you promoted SmartDoctor GenZ. Our engagement team will monitor traction and manually award bonus shares based on real post performance.</p>
+                    <input type="url" id="boostLink" placeholder="https://x.com/... or Instagram post link">
+                    <button id="submitBoostBtn">📢 Submit Campaign Link for Review</button>
+                    <div id="boostMessage" style="margin-top: 8px; font-size:0.8rem;"></div>
+                    
+                    <div id="submittedLinksContainer" style="margin-top: 24px; background: #0A0F1A; border-radius: 24px; padding: 16px;">
+                        <h4 style="margin-bottom: 12px;">📋 My Submitted Links (Pending Review)</h4>
+                        <div id="linksList" class="log-area" style="max-height: 180px;">No links submitted yet.</div>
+                        <p style="font-size: 0.7rem; margin-top: 12px; color: #FACC15;">* Bonus shares are awarded manually by admin after analyzing post engagement (likes, shares, reach).</p>
                     </div>
-                    <h3>Simple Logging</h3>
-                    <p>Quickly log medications with our intuitive interface. Add notes and track side effects.</p>
+                    
+                    <hr style="margin:20px 0">
+                    <div class="flex-between"><span>⭐ Executive Recognition (Merit-based)</span><button id="simulateBonusBtn" class="secondary">🎖️ Award Performance Bonus</button></div>
+                    <div id="bonusHistory" class="log-area" style="margin-top: 20px;"></div>
                 </div>
             </div>
-            
-            <div class="countdown">
-                <h3>Expected Release In:</h3>
-                <div class="timer">
-                    <div class="time-unit">
-                        <span id="days" class="time-value">07</span>
-                        <span class="time-label">Days</span>
-                    </div>
-                    <div class="time-unit">
-                        <span id="hours" class="time-value">12</span>
-                        <span class="time-label">Hours</span>
-                    </div>
-                    <div class="time-unit">
-                        <span id="minutes" class="time-value">45</span>
-                        <span class="time-label">Minutes</span>
-                    </div>
-                    <div class="time-unit">
-                        <span id="seconds" class="time-value">30</span>
-                        <span class="time-label">Seconds</span>
-                    </div>
+
+          
+            <div id="tradeSection" class="dashboard-section" style="display:none;">
+                <div class="section-card" style="text-align: center;">
+                    <h3>🔒 Trade Desk — Regulated Access</h3>
+                    <p style="margin: 20px auto; max-width: 500px;">Per compliance, direct buy/sell requires official request. Submit your inquiry to receive the transaction form.</p>
+                    <div style="background: #0B1120; border-radius: 48px; padding: 28px; margin: 20px 0;"><span style="font-size: 1.2rem;">📧 smartdrgenz@gmail.com</span><br><span style="font-size:0.8rem;">Subject: "TRADE REQ - [USERNAME]" - share quantity & action</span></div>
+                    <button disabled style="background:#2D3A5E; cursor:not-allowed;">📄 Request Form (Simulated)</button>
                 </div>
             </div>
-            
-            <button class="cta-button" id="notifyBtn">
-                <i class="fas fa-bell"></i> Notify Me When It's Ready
-            </button>
-            
-            <p class="footer">
-                We are finalizing the update and will announce the specific release date shortly. 
-                Thank you for your patience and support,we can't wait for you to use it!
-            </p>
         </div>
     </div>
+</div>
 
-    <script src="script.js"></script>
 
-    
+<script src="script.js"></script>
 </body>
 </html>
+
