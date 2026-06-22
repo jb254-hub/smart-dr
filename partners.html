@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sun Medical Centre | Light · Hope · Healing</title>
+  <!-- Font Awesome 6 (free) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <style>
+    /* --- WELCOME OVERLAY (full screen splash) --- */
+    #welcome-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #f9fbfd;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      transition: opacity 0.8s ease;
+      text-align: center;
+      padding: 20px;
+    }
+
+    #welcome-overlay.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #welcome-overlay img {
+      max-width: 200px;
+      width: 100%;
+      height: auto;
+      border-radius: 24px;
+      box-shadow: 0 16px 48px rgba(11, 94, 124, 0.15);
+      margin-bottom: 30px;
+      border: 4px solid #f3a34b30;
+    }
+
+    #welcome-overlay h1 {
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: #0b5e7c;
+      letter-spacing: -0.5px;
+    }
+
+    #welcome-overlay h1 span {
+      color: #f3a34b;
+    }
+
+    #welcome-overlay .sub {
+      font-size: 1.2rem;
+      color: #3f5a6b;
+      margin-top: 8px;
+      font-weight: 300;
+      letter-spacing: 1px;
+    }
+
+    #welcome-overlay .loader {
+      margin-top: 40px;
+      width: 60px;
+      height: 60px;
+      border: 5px solid #e6f0f5;
+      border-top: 5px solid #0b5e7c;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* --- MAIN SITE (hidden until welcome fades) --- */
+    #main-site {
+      opacity: 0;
+      transition: opacity 0.6s ease;
+    }
+
+    #main-site.visible {
+      opacity: 1;
+    }
+
+    /* --- REST OF THE STYLES (unchanged from your original) --- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background: #f9fbfd;
+      color: #1e2b37;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 30px;
+    }
+
+    /* header */
+    header {
+      background: white;
+      box-shadow: 0 4px 12px rgba(0, 20, 30, 0.06);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 0;
+      flex-wrap: wrap;
+    }
+
+    .logo h1 {
+      font-size: 1.9rem;
+      font-weight: 600;
+      color: #0b5e7c;
+      letter-spacing: -0.3px;
+    }
+
+    .logo span {
+      color: #f3a34b;
+      font-weight: 300;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      font-weight: 500;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: #1e2b37;
+      transition: 0.2s;
+      font-size: 1rem;
+    }
+
+    .nav-links a:hover {
+      color: #0b5e7c;
+    }
+
+    .contact-icon-group {
+      display: flex;
+      gap: 18px;
+      font-size: 1.3rem;
+    }
+
+    .contact-icon-group a {
+      color: #1e2b37;
+      transition: 0.2s;
+      background: #f0f4f8;
+      width: 42px;
+      height: 42px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      text-decoration: none;
+    }
+
+    .contact-icon-group a:hover {
+      background: #0b5e7c;
+      color: white;
+      transform: scale(1.05);
+    }
+
+    /* hero */
+    .hero {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      padding: 50px 0 60px;
+      gap: 40px;
+    }
+
+    .hero-text {
+      flex: 1 1 400px;
+    }
+
+    .hero-text h2 {
+      font-size: 3rem;
+      font-weight: 700;
+      color: #0b5e7c;
+      line-height: 1.2;
+      margin-bottom: 12px;
+    }
+
+    .hero-text h2 i {
+      color: #f3a34b;
+      font-size: 2.8rem;
+      margin-right: 6px;
+    }
+
+    .hero-tagline {
+      font-size: 1.3rem;
+      font-weight: 400;
+      color: #f3a34b;
+      margin-bottom: 18px;
+      letter-spacing: 0.5px;
+    }
+
+    .hero-text p {
+      font-size: 1.15rem;
+      color: #2d4050;
+      margin-bottom: 28px;
+      max-width: 550px;
+    }
+
+    .cta-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .cta-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      color: white;
+      text-decoration: none;
+      transition: 0.25s ease;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.10);
+      border: none;
+    }
+
+    .cta-icon:hover {
+      transform: translateY(-4px) scale(1.05);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.18);
+    }
+
+    .cta-icon.phone {
+      background: #0b5e7c;
+    }
+    .cta-icon.phone:hover {
+      background: #084b64;
+    }
+    .cta-icon.whatsapp {
+      background: #25D366;
+    }
+    .cta-icon.whatsapp:hover {
+      background: #1da851;
+    }
+    .cta-icon.email {
+      background: #ea4335;
+    }
+    .cta-icon.email:hover {
+      background: #d33426;
+    }
+
+    .hero-image {
+      flex: 1 1 400px;
+      background: #d9e4ec;
+      border-radius: 30px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px -12px rgba(0,0,0,0.15);
+      min-height: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500"><rect width="800" height="500" fill="%23b6d2df"/><circle cx="200" cy="200" r="80" fill="%23f3c89b" opacity="0.8"/><circle cx="600" cy="280" r="100" fill="%23f3c89b" opacity="0.7"/><path d="M0 350 L200 250 L400 350 L600 200 L800 320 L800 500 L0 500 Z" fill="%23a3c4d4" opacity="0.6"/><rect x="100" y="300" width="120" height="80" rx="10" fill="%23ffffff80"/><rect x="550" y="240" width="140" height="90" rx="10" fill="%23ffffff80"/><circle cx="180" cy="330" r="20" fill="%230b5e7c" opacity="0.8"/><circle cx="630" cy="280" r="30" fill="%230b5e7c" opacity="0.8"/></svg>');
+      background-size: cover;
+      background-position: center;
+      position: relative;
+    }
+
+    .hero-image::after {
+      content: "☀️ Sun Medical Centre";
+      position: absolute;
+      bottom: 20px;
+      right: 25px;
+      background: rgba(11, 94, 124, 0.85);
+      color: white;
+      padding: 8px 22px;
+      border-radius: 50px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      backdrop-filter: blur(2px);
+      font-size: 0.95rem;
+    }
+
+    /* section */
+    .section-title {
+      font-size: 2.2rem;
+      font-weight: 600;
+      color: #0b5e7c;
+      margin-bottom: 16px;
+      position: relative;
+      display: inline-block;
+    }
+
+    .section-title:after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: -8px;
+      width: 60px;
+      height: 4px;
+      background: #f3a34b;
+      border-radius: 4px;
+    }
+
+    .section-sub {
+      color: #3f5a6b;
+      margin-top: 8px;
+      margin-bottom: 28px;
+      font-size: 1.1rem;
+    }
+
+    /* core values */
+    .values-section {
+      padding: 40px 0 20px;
+    }
+
+    .values-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .value-item {
+      background: white;
+      border-radius: 20px;
+      padding: 20px 14px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+      border: 1px solid #edf2f7;
+      transition: 0.2s;
+    }
+
+    .value-item:hover {
+      border-color: #b6d2df;
+    }
+
+    .value-item i {
+      font-size: 2rem;
+      color: #0b5e7c;
+      margin-bottom: 8px;
+    }
+
+    .value-item h4 {
+      color: #0b5e7c;
+      font-size: 1rem;
+    }
+
+    .value-item p {
+      font-size: 0.85rem;
+      color: #3f5564;
+    }
+
+    /* services */
+    .services {
+      padding: 60px 0 40px;
+    }
+
+    .service-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 28px;
+      margin-top: 30px;
+    }
+
+    .service-card {
+      background: white;
+      border-radius: 24px;
+      padding: 28px 18px;
+      text-align: center;
+      box-shadow: 0 8px 24px rgba(0, 20, 30, 0.05);
+      transition: 0.25s ease;
+      border: 1px solid #edf2f7;
+    }
+
+    .service-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 18px 36px -10px rgba(11, 94, 124, 0.12);
+      border-color: #b6d2df;
+    }
+
+    .service-card i {
+      font-size: 2.4rem;
+      color: #0b5e7c;
+      background: #e6f0f5;
+      padding: 16px;
+      border-radius: 50%;
+      margin-bottom: 14px;
+      display: inline-block;
+    }
+
+    .service-card h3 {
+      font-size: 1.2rem;
+      margin-bottom: 6px;
+      color: #1a2e3d;
+    }
+
+    .service-card p {
+      color: #3f5564;
+      font-size: 0.9rem;
+    }
+
+    /* leadership */
+    .leadership {
+      padding: 40px 0 50px;
+    }
+
+    .lead-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 40px;
+      justify-content: center;
+      margin-top: 30px;
+    }
+
+    .lead-card {
+      background: white;
+      border-radius: 32px;
+      padding: 30px 25px;
+      flex: 1 1 260px;
+      max-width: 340px;
+      text-align: center;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.03);
+      border: 1px solid #eef5f9;
+      transition: 0.2s;
+    }
+
+    .lead-card:hover {
+      border-color: #b6d2df;
+      box-shadow: 0 18px 36px rgba(11, 94, 124, 0.06);
+    }
+
+    .lead-avatar {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      margin: 0 auto 16px;
+      background-size: cover;
+      background-position: center;
+      border: 4px solid #f3a34b30;
+      background-color: #cbdbe6;
+    }
+
+    .lead-card:nth-child(1) .lead-avatar {
+      background-image: url('https://randomuser.me/api/portraits/men/32.jpg');
+    }
+    .lead-card:nth-child(2) .lead-avatar {
+      background-image: url('https://randomuser.me/api/portraits/women/44.jpg');
+    }
+
+    .lead-card h3 {
+      font-size: 1.3rem;
+      color: #0b5e7c;
+    }
+
+    .lead-title {
+      color: #f3a34b;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .lead-card .quote {
+      color: #3f5564;
+      font-size: 0.95rem;
+      margin-top: 10px;
+      font-style: italic;
+    }
+
+    .lead-card .bio {
+      font-style: normal;
+      font-size: 0.9rem;
+      margin-top: 6px;
+      color: #2d4050;
+    }
+
+    /* Medical Personnel (team) */
+    .personnel {
+      padding: 40px 0 20px;
+    }
+
+    .personnel-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 28px;
+      margin-top: 30px;
+    }
+
+    .personnel-card {
+      background: white;
+      border-radius: 24px;
+      padding: 20px 16px;
+      text-align: center;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.02);
+      border: 1px solid #edf2f7;
+      transition: 0.2s;
+    }
+
+    .personnel-card:hover {
+      border-color: #b6d2df;
+      transform: translateY(-4px);
+      box-shadow: 0 12px 28px rgba(11, 94, 124, 0.06);
+    }
+
+    .personnel-avatar {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      margin: 0 auto 12px;
+      background-size: cover;
+      background-position: center;
+      background-color: #d9e4ec;
+      border: 3px solid #f3a34b30;
+    }
+
+    .personnel-card h4 {
+      color: #0b5e7c;
+      font-size: 1.05rem;
+    }
+
+    .personnel-card .role {
+      color: #f3a34b;
+      font-weight: 600;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .personnel-card p {
+      color: #3f5564;
+      font-size: 0.85rem;
+      margin-top: 4px;
+    }
+
+    /* pharmacy */
+    .pharmacy-section {
+      background: #edf4f9;
+      border-radius: 40px;
+      padding: 50px 40px;
+      margin: 20px 0 40px;
+    }
+
+    .pharmacy-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      align-items: stretch;
+      justify-content: center;
+    }
+
+    .drug-item {
+      background: white;
+      border-radius: 28px;
+      padding: 18px 16px 16px;
+      flex: 1 1 140px;
+      max-width: 180px;
+      text-align: center;
+      box-shadow: 0 8px 18px rgba(0, 20, 30, 0.04);
+      transition: 0.3s;
+      border: 1px solid #eef5f9;
+    }
+
+    .drug-item:hover {
+      transform: scale(1.03);
+      box-shadow: 0 12px 28px rgba(11, 94, 124, 0.10);
+      border-color: #b6d2df;
+    }
+
+    .drug-img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      margin: 0 auto 10px;
+      background-size: cover;
+      background-position: center;
+      background-color: #e6f0f5;
+      border: 2px solid #f3a34b30;
+    }
+
+    .drug-item h5 {
+      font-weight: 600;
+      color: #1a2e3d;
+      font-size: 1rem;
+    }
+
+    .drug-item span {
+      font-size: 0.78rem;
+      color: #4f6678;
+      display: block;
+      margin-top: 2px;
+    }
+
+    /* contact */
+    .contact-section {
+      background: white;
+      padding: 50px 0 40px;
+      border-radius: 40px 40px 0 0;
+      margin-top: 30px;
+      box-shadow: 0 -8px 28px rgba(0,0,0,0.02);
+    }
+
+    .contact-flex {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 30px;
+    }
+
+    .contact-info h4 {
+      font-size: 1.6rem;
+      color: #0b5e7c;
+      margin-bottom: 8px;
+    }
+
+    .contact-info p {
+      color: #2d4050;
+      margin-bottom: 6px;
+    }
+
+    .contact-info a {
+      color: #0b5e7c;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .contact-info a:hover {
+      text-decoration: underline;
+    }
+
+    .social-icons {
+      display: flex;
+      gap: 24px;
+      font-size: 2.2rem;
+      flex-wrap: wrap;
+    }
+
+    .social-icons a {
+      color: #1e2b37;
+      transition: 0.2s;
+      background: #f0f4f8;
+      width: 64px;
+      height: 64px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      text-decoration: none;
+    }
+
+    .social-icons a:hover {
+      background: #0b5e7c;
+      color: white;
+      transform: scale(1.06);
+    }
+
+    .whatsapp-float {
+      background: #25D366;
+      color: white;
+    }
+
+    .whatsapp-float:hover {
+      background: #1da851 !important;
+      color: white !important;
+    }
+
+    .footer-bottom {
+      text-align: center;
+      margin-top: 40px;
+      color: #4f6678;
+      font-size: 0.95rem;
+      border-top: 1px solid #e5edf4;
+      padding-top: 24px;
+    }
+
+    @media (max-width: 720px) {
+      .header-inner {
+        flex-direction: column;
+        gap: 16px;
+      }
+      .nav-links {
+        gap: 20px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .hero-text h2 {
+        font-size: 2.3rem;
+      }
+      .contact-flex {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .social-icons {
+        width: 100%;
+        justify-content: center;
+      }
+      .pharmacy-section {
+        padding: 30px 20px;
+      }
+      .cta-group {
+        justify-content: center;
+      }
+      #welcome-overlay h1 {
+        font-size: 2rem;
+      }
+      #welcome-overlay img {
+        max-width: 150px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== WELCOME OVERLAY ===== -->
+  <div id="welcome-overlay">
+    <img src="https://res.cloudinary.com/dvob5n3ls/image/upload/v1781878360/WhatsApp_Image_2026-06-19_at_08.44.36_lo8epj.jpg" alt="Sun Medical Centre Logo" />
+    <h1>Welcome to <span>Sun Clinical Centre</span></h1>
+    <div class="sub">Bringing light, hope and healing to every life.</div>
+    <div class="loader"></div>
+  </div>
+
+  <!-- ===== MAIN SITE ===== -->
+  <div id="main-site">
+    <header>
+      <div class="container header-inner">
+        <div class="logo">
+          <h1>☀️ Sun <span>Medical</span> Centre</h1>
+        </div>
+        <div class="nav-links">
+          <a href="#">Home</a>
+          <a href="#services">Services</a>
+          <a href="#leadership">Leadership</a>
+          <a href="#personnel">Team</a>
+          <a href="#pharmacy">Pharmacy</a>
+          <a href="#contact">Contact</a>
+        </div>
+        <div class="contact-icon-group">
+          <a href="tel:+254716737108" aria-label="Call"><i class="fas fa-phone-alt"></i></a>
+          <a href="https://wa.me/254716737108" target="_blank" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+          <a href="mailto:thesunmedicalclinic2024@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
+          <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <!-- HERO -->
+      <div class="container hero">
+        <div class="hero-text">
+          <h2><i class="fas fa-sun"></i> Light · Hope · Healing</h2>
+          <div class="hero-tagline">Bringing light, hope and healing to every life.</div>
+          <p>Sun Medical Centre — trusted, compassionate care. We bring warmth and vitality to our community, just as the sun brings life.</p>
+          <div class="cta-group">
+            <a href="tel:+254716737108" class="cta-icon phone" aria-label="Call now"><i class="fas fa-phone-alt"></i></a>
+            <a href="https://wa.me/254716737108" target="_blank" class="cta-icon whatsapp" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+            <a href="mailto:thesunmedicalclinic2024@gmail.com" class="cta-icon email" aria-label="Email us"><i class="fas fa-envelope"></i></a>
+          </div>
+        </div>
+        <div class="hero-image"></div>
+      </div>
+
+      <!-- CORE VALUES -->
+      <div class="container values-section">
+        <h2 class="section-title">Our Core Values</h2>
+        <p class="section-sub">Guided by respect, compassion, and excellence.</p>
+        <div class="values-grid">
+          <div class="value-item"><i class="fas fa-hand-holding-heart"></i><h4>Respect</h4><p>Valuing every individual, trust &amp; confidentiality</p></div>
+          <div class="value-item"><i class="fas fa-heart"></i><h4>Compassion</h4><p>Kindness, dignity &amp; respect for all</p></div>
+          <div class="value-item"><i class="fas fa-user-md"></i><h4>Patient Centered</h4><p>Putting patients first, dedicated service</p></div>
+          <div class="value-item"><i class="fas fa-star"></i><h4>Excellence</h4><p>Quality care through professionalism</p></div>
+          <div class="value-item"><i class="fas fa-shield-alt"></i><h4>Integrity</h4><p>Honesty, ethics &amp; accountability</p></div>
+          <div class="value-item"><i class="fas fa-lightbulb"></i><h4>Innovation</h4><p>Modern practices &amp; health education</p></div>
+        </div>
+      </div>
+
+      <!-- SERVICES -->
+      <div class="container services" id="services">
+        <h2 class="section-title">Our Services</h2>
+        <p class="section-sub">Comprehensive care — 24 hours, 7 days a week.</p>
+        <div class="service-grid">
+          <div class="service-card"><i class="fas fa-stethoscope"></i><h3>General Consultation</h3><p>Expert diagnosis and treatment for all ages.</p></div>
+          <div class="service-card"><i class="fas fa-flask"></i><h3>Laboratory Services</h3><p>Accurate testing &amp; rapid results.</p></div>
+          <div class="service-card"><i class="fas fa-pills"></i><h3>Pharmacy</h3><p>Full-service prescription &amp; delivery.</p></div>
+          <div class="service-card"><i class="fas fa-users"></i><h3>Family Planning</h3><p>Confidential reproductive health.</p></div>
+          <div class="service-card"><i class="fas fa-heartbeat"></i><h3>HIV Services</h3><p>Testing, counselling &amp; care.</p></div>
+          <div class="service-card"><i class="fas fa-scalpel"></i><h3>Minor Surgeries</h3><p>Safe procedures in a sterile environment.</p></div>
+        </div>
+      </div>
+
+      <!-- LEADERSHIP -->
+      <div class="container leadership" id="leadership">
+        <h2 class="section-title">Our Leadership</h2>
+        <p class="section-sub">Dedicated to excellence and compassionate care.</p>
+        <div class="lead-grid">
+          <!-- CEO -->
+          <div class="lead-card">
+            <img src="https://res.cloudinary.com/dvob5n3ls/image/upload/v1781885030/WhatsApp_Image_2026-06-19_at_10.59.01_utortp.jpg" alt="" class="lead-avatar" />
+            <h3>Ong'icha Elkana Otoyi</h3>
+            <div class="lead-title">Director</div>
+            <div class="quote">"Healthcare is not just a service — it's a mission to bring light and hope."</div>
+            <div class="bio">passionate about community wellness.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MEDICAL PERSONNEL -->
+      <div class="container personnel" id="personnel">
+        <h2 class="section-title">Our Medical Team</h2>
+        <p class="section-sub">Skilled professionals committed to your health.</p>
+        <div class="personnel-grid">
+          <div class="personnel-card">
+            <div class="personnel-avatar" style="background-image: url('');"></div>
+            <div class="role">Nurse</div>
+            <p>Proffesional in patient care &amp; emergency response.</p>
+          </div>
+          <div class="personnel-card">
+            <div class="personnel-avatar" style="background-image: url('');"></div>
+            <div class="role">Clinical Officer</div>
+            <p>Expert in diagnosis &amp; minor surgical procedures.</p>
+          </div>
+          <div class="personnel-card">
+            <div class="personnel-avatar" style="background-image: url('');"></div>
+            <div class="role">Pharmacist</div>
+            <p>Manages pharmacy &amp; medication safety.</p>
+          </div>
+          <div class="personnel-card">
+            <div class="personnel-avatar" style="background-image: url('');"></div>
+            <div class="role">Laboratory Technologist</div>
+            <p>Accurate diagnostics &amp; quality testing.</p>
+          </div>
+          <div class="personnel-card">
+            <div class="personnel-avatar" style="background-image: url('');"></div>
+            <div class="role">Doctor</div>
+            <p>Specializes in maternal &amp; child health.</p>
+          </div>
+          <div class="personnel-card">
+            <div class="personnel-avatar" style="background-image: url('');"></div>
+            <div class="role">Administrator</div>
+            <p>Patient relations &amp; clinic operations.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- PHARMACY -->
+      <div class="container pharmacy-section" id="pharmacy">
+        <h2 class="section-title" style="margin-bottom: 8px;">💊 Pharmacy &amp; Medications</h2>
+        <p class="section-sub" style="margin-bottom: 24px;">Quality medicines, always in stock.</p>
+        <div class="pharmacy-grid">
+          <div class="drug-item">
+            <div class="drug-img" style="background-image: url('https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=150&h=150&fit=crop&crop=center');"></div>
+            <h5>Antibiotics</h5>
+            <span>Amoxicillin, Ciprofloxacin</span>
+          </div>
+          <div class="drug-item">
+            <div class="drug-img" style="background-image: url('data:image/jpeg;base64,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');"></div>
+            <h5>Pain Relief</h5>
+            <span>Ibuprofen, Paracetamol</span>
+          </div>
+          <div class="drug-item">
+            <div class="drug-img" style="background-image: url('data:image/jpeg;base64,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');"></div>
+            <h5>Vaccines</h5>
+            <span>Flu, COVID-19, MMR</span>
+          </div>
+          <div class="drug-item">
+            <div class="drug-img" style="background-image: url('data:image/jpeg;base64,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');"></div>
+            <h5>Chronic Care</h5>
+            <span>Insulin, Statins, BP meds</span>
+          </div>
+          <div class="drug-item">
+            <div class="drug-img" style="background-image: url('https://images.unsplash.com/photo-1631549916768-4119b2e5f926?w=150&h=150&fit=crop&crop=center');"></div>
+            <h5>First Aid</h5>
+            <span>Bandages, antiseptics</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTACT -->
+      <div class="contact-section" id="contact">
+        <div class="container contact-flex">
+          <div class="contact-info">
+            <h4>📞 Get in touch</h4>
+            <p><i class="fas fa-map-pin" style="color:#0b5e7c; width:20px;"></i> Nyalenda Kawater, Okonyo Welo Market</p>
+            <p><i class="fas fa-phone-alt" style="color:#0b5e7c; width:20px;"></i> <a href="tel:+254716737108">0716 737 108</a></p>
+            <p><i class="fas fa-envelope" style="color:#0b5e7c; width:20px;"></i> <a href="mailto:thesunmedicalclinic2024@gmail.com">thesunmedicalclinic2024@gmail.com</a></p>
+            <p><i class="fas fa-clock" style="color:#0b5e7c; width:20px;"></i> 24 hours · 7 days a week</p>
+          </div>
+          <div class="social-icons">
+            <a href="tel:+254716737108" aria-label="Call"><i class="fas fa-phone-alt"></i></a>
+            <a href="https://wa.me/254716737108" target="_blank" class="whatsapp-float" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+            <a href="mailto:thesunmedicalclinic2024@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
+            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          </div>
+        </div>
+        <div class="container footer-bottom">
+          <p>© 2026 Sun Medical Centre — bringing light, hope and healing to every life.</p>
+          <p style="margin-top:6px; font-size:0.85rem;"><i class="fas fa-shield-alt"></i> Trusted · Compassionate · Accessible</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- ===== WELCOME SCRIPT ===== -->
+  <script>
+    (function() {
+      const overlay = document.getElementById('welcome-overlay');
+      const mainSite = document.getElementById('main-site');
+
+      setTimeout(function() {
+        overlay.classList.add('fade-out');
+        mainSite.classList.add('visible');
+        setTimeout(function() {
+          overlay.style.display = 'none';
+        }, 800);
+      }, 4000);
+    })();
+  </script>
+</body>
+</html>
