@@ -161,11 +161,11 @@ function getInitialGreeting() {
 
 function addMessage(message, isUser = false) {
     if (!messagesContainer) return;
-    
+
     const messageDiv = document.createElement('div');
     messageDiv.classList.add('message');
     messageDiv.classList.add(isUser ? 'user-message' : 'bot-message');
-    
+
     if (isUser) {
         messageDiv.innerHTML = `
             <div class="message-content">
@@ -175,25 +175,45 @@ function addMessage(message, isUser = false) {
             <div class="message-avatar user-avatar">${currentUser ? currentUser.name.charAt(0) : 'U'}</div>
         `;
     } else {
-        // Check if message contains medical alerts
+        // ✅ Convert Markdown → HTML
         let formattedMessage = message;
-        if (message.includes('EMERGENCY') || message.includes('urgent') || message.includes('immediately')) {
-            formattedMessage = `<div class="medical-alert">${message}</div>`;
-        } else if (message.includes('warning') || message.includes('caution')) {
-            formattedMessage = `<div class="medical-warning">${message}</div>`;
-        } else if (message.includes('advice') || message.includes('recommend')) {
-            formattedMessage = `<div class="medical-advice">${message}</div>`;
+        try {
+            // Configure marked for safe, clean output
+            marked.setOptions({
+                breaks: true,
+                gfm: true,
+                sanitize: false,      // we handle sanitization manually
+                headerIds: false
+            });
+            formattedMessage = marked.parse(message);
+        } catch (e) {
+            console.warn('Markdown parsing failed, using plain text:', e);
+            // fallback: escape HTML and treat as plain text
+            const div = document.createElement('div');
+            div.textContent = message;
+            formattedMessage = div.innerHTML;
         }
-        
+
+        // Now wrap with medical alert/warning/advice if needed (after rendering)
+        let finalHtml = formattedMessage;
+        const msgLower = message.toLowerCase(); // use original message for detection
+        if (msgLower.includes('emergency') || msgLower.includes('urgent') || msgLower.includes('immediately')) {
+            finalHtml = `<div class="medical-alert">${formattedMessage}</div>`;
+        } else if (msgLower.includes('warning') || msgLower.includes('caution')) {
+            finalHtml = `<div class="medical-warning">${formattedMessage}</div>`;
+        } else if (msgLower.includes('advice') || msgLower.includes('recommend')) {
+            finalHtml = `<div class="medical-advice">${formattedMessage}</div>`;
+        }
+
         messageDiv.innerHTML = `
             <div class="message-avatar bot-avatar">D</div>
             <div class="message-content">
                 <div class="message-sender">Dr. GenZ</div>
-                <div>${formattedMessage}</div>
+                <div>${finalHtml}</div>
             </div>
         `;
     }
-    
+
     messagesContainer.appendChild(messageDiv);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
