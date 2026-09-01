@@ -1,272 +1,1205 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial‑scale=1.0">
-    <title>Smart Dr. GenZ ‑ AI Smart Doctor</title>
+// API Configuratio
+const API_BASE_URL = 'http://localhost:3000/api'; // Change this to your backend URL
 
-    <link rel="icon" href="https://res.cloudinary.com/devwniw2h/image/upload/v1762241192/Gemini_Generated_Image_3ddoqg3ddoqg3ddo_xulqzq.jpg" type="image/png">
-    <link rel="apple-touch-icon" sizes="180x180" href="https://res.cloudinary.com/devwniw2h/image/upload/v1762241192/Gemini_Generated_Image_3ddoqg3ddoqg3ddo_xulqzq.jpg">
+// DOM Elements
+const welcomeScreen = document.getElementById('welcome-screen');
+const userInfoForm = document.getElementById('user-info-form');
+const userNameInput = document.getElementById('user-name');
+const userAgeInput = document.getElementById('user-age');
+const userGenderSelect = document.getElementById('user-gender');
+const userSpecialtySelect = document.getElementById('user-specialty');
+const startChatBtn = document.getElementById('start-chat-btn');
+const messagesContainer = document.getElementById('messages-container');
+const userInput = document.getElementById('user-input');
+const sendBtn = document.getElementById('send-btn');
+const voiceInputBtn = document.getElementById('voice-input-btn');
+const startVoiceBtn = document.getElementById('start-voice-btn');
+const stopVoiceBtn = document.getElementById('stop-voice-btn');
+const toggleSpeechBtn = document.getElementById('toggle-speech-btn');
+const voiceVisualizer = document.getElementById('voice-visualizer');
+const voiceRecordingIndicator = document.getElementById('voice-recording-indicator');
+const statusText = document.getElementById('status-text');
+const statusDot = document.getElementById('status-dot');
+const typingIndicator = document.getElementById('typing-indicator');
+const specialtyIndicator = document.getElementById('specialty-indicator');
+const modelSelect = document.getElementById('model-select');
+const mobileModelSelect = document.getElementById('mobile-model-select');
+const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+const sidebar = document.getElementById('sidebar');
+const sidebarOverlay = document.getElementById('sidebar-overlay');
+const newChatBtn = document.getElementById('new-chat-btn');
+const conversationHistory = document.getElementById('conversation-history');
 
-    <meta property="og:title" content="Dr. GenZ ‑ AI Smart Doctor">
-    <meta property="og:description" content="Your AI Smart Doctor — personalized medical guidance and health insights.">
-    <meta property="og:image" content="https://res.cloudinary.com/devwniw2h/image/upload/v1762241192/Gemini_Generated_Image_3ddoqg3ddoqg3ddo_xulqzq.jpg">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://smartdr.online">
+// Medical tool buttons
+const symptomCheckerBtn = document.getElementById('symptom-checker-btn');
+const healthTrackerBtn = document.getElementById('health-tracker-btn');
+const diagnosticAssistantBtn = document.getElementById('diagnostic-assistant-btn');
+const preventiveCareBtn = document.getElementById('preventive-care-btn');
+const medicationBtn = document.getElementById('medication-btn');
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="styles.css">
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-MQRXJB1MHN"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-MQRXJB1MHN');
-  document.addEventListener("click", function(e) {
-    let target = e.target.closest("a");
-    if (target && target.hostname !== location.hostname) {
-      gtag("event", "click", {
-        "event_category": "outbound",
-        "event_label": target.href,
-        "transport_type": "beacon"
-      });
+// User information
+let currentUser = null;
+let currentSessionId = null;
+let isChatStarted = false;
+
+// Voice settings
+let isSpeechEnabled = false;
+let isVoiceActive = false;
+let voiceBars = [];
+
+// Mobile sidebar state
+let isSidebarOpen = false;
+
+// Conversation history
+let conversationHistoryData = [];
+
+// ============================================
+// CORE FUNCTIONS - Defined First
+// ============================================
+
+function createSystemMessage() {
+    if (!currentUser) return null;
+    
+    const specialty = modelSelect ? modelSelect.value : 'general';
+    let specialtyFocus = '';
+    
+    switch(specialty) {
+        case 'general':
+            specialtyFocus = 'You are a general practitioner with broad medical knowledge.';
+            break;
+        case 'pediatrics':
+            specialtyFocus = 'You specialize in pediatric care and children\'s health.';
+            break;
+        case 'cardiology':
+            specialtyFocus = 'You specialize in heart health and cardiovascular conditions.';
+            break;
+        case 'dermatology':
+            specialtyFocus = 'You specialize in skin conditions and dermatological health.';
+            break;
+        case 'mental':
+            specialtyFocus = 'You specialize in mental health and psychological well-being.';
+            break;
+    }
+    
+    return {
+        role: "system",
+        content: `You are Dr. GenZ, an AI medical assistant designed to provide health information, emotional support and guidance.
+        The user is ${currentUser.name}, ${currentUser.age} years old, who identifies as ${currentUser.gender}.
+        
+        ${specialtyFocus}
+        
+        IMPORTANT MEDICAL DISCLAIMER: You are an AI assistant, not a licensed medical professional. 
+        You cannot provide medical diagnoses, prescribe treatments, or replace professional medical care.
+        
+        STRICT TOPIC RESTRICTIONS:
+        - ONLY answer questions related to: health, guidance, counselling, medicine, diseases, feelings, death, medications, symptoms, medical conditions, 
+          emotional well-being, mental health, psychology, lifestyle factors affecting health
+        - DO NOT answer questions about: coding, technology, programming, math, science (unless medical science),
+          history, politics, entertainment, sports, or any other non-medical topics
+
+           PERSONALITY: You are warm, empathetic, supportive, and engaging. You're not just clinical - you genuinely care about people's well-being. You use conversational language, show emotional intelligence, and build rapport with users.
+
+           COUNSELING & GUIDANCE APPROACH:
+        - For emotional issues: "How has that been affecting your daily life?"
+        - For motivation: "What's one small step you could take today?"
+        - For anxiety: "Let's break this down together. What's the smallest part you can tackle?"
+        - For loneliness: "Many people feel this way. Would you like to talk about what might help you feel more connected?"
+        - For stress: "What usually helps you feel more centered? Even 5 minutes of deep breathing can help."
+        
+        CONVERSATION STARTERS & ENGAGEMENT:
+        - "How have you been feeling lately, not just physically but emotionally?"
+        - "What's been on your mind health-wise recently?"
+        - "Tell me more about that - I'm here to listen."
+        - "That's really insightful. What do you think would help most right now?"
+        - "I appreciate you sharing that with me. It takes courage to talk about health concerns."
+
+        
+        Your role is to:
+        - Provide general health information and education
+        - Help users understand their symptoms
+        - Explain medical terms and conditions
+        - Offer lifestyle and wellness advice
+        - Guide users on when to seek professional medical care
+        - Discuss emotional and mental health concerns
+        - Provide information about medications and their effects
+        
+        When users ask about non-medical topics:
+        - Politely redirect them back to health-related topics
+        - Say: "I specialize only in health, medication, and emotional well-being topics. I can't help with that subject."
+        - Suggest they ask about health concerns instead
+        
+        Always include appropriate medical disclaimers in your responses.
+        If symptoms suggest a serious condition, advise immediate medical attention.
+        Be empathetic, clear, and professional in your communication.
+        Ask follow-up questions to gather relevant health information.
+        Provide evidence-based information when possible.
+        Respect user privacy and maintain confidentiality.
+        
+        Current conversation context: ${currentUser.name} is seeking medical information and guidance.`
+    };
+}
+
+function getInitialGreeting() {
+    if (!currentUser) return "Hello! I'm Dr. GenZ. How can I assist you with your health concerns today?";
+    
+    const age = parseInt(currentUser.age);
+    let ageGroup = '';
+    
+    if (age < 18) ageGroup = 'young';
+    else if (age < 40) ageGroup = 'adult';
+    else if (age < 65) ageGroup = 'middle-aged';
+    else ageGroup = 'senior';
+    
+    const greetings = [
+        `Hello ${currentUser.name}, I'm Dr. GenZ. I understand you're ${currentUser.age} years old. I'm here to provide health information and guidance. Please remember that I'm an AI assistant, not a replacement for professional medical care. How can I help you today?`,
+        `Welcome ${currentUser.name}. I'm Dr. GenZ, your AI medical assistant. I see you're ${currentUser.age} years old. I can help answer health questions and provide general medical information. What would you like to discuss?`,
+        `Good day ${currentUser.name}. I'm Dr. GenZ. As a ${ageGroup} individual aged ${currentUser.age}, you may have specific health considerations. I'm here to provide information and guidance. What health concerns would you like to address?`
+    ];
+    
+    return greetings[Math.floor(Math.random() * greetings.length)];
+}
+
+function addMessage(message, isUser = false) {
+    if (!messagesContainer) return;
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.classList.add('message');
+    messageDiv.classList.add(isUser ? 'user-message' : 'bot-message');
+    
+    if (isUser) {
+        messageDiv.innerHTML = `
+            <div class="message-content">
+                <div class="message-sender">${currentUser ? currentUser.name : 'User'}</div>
+                <div>${message}</div>
+            </div>
+            <div class="message-avatar user-avatar">${currentUser ? currentUser.name.charAt(0) : 'U'}</div>
+        `;
+    } else {
+        // Check if message contains medical alerts
+        let formattedMessage = message;
+        if (message.includes('EMERGENCY') || message.includes('urgent') || message.includes('immediately')) {
+            formattedMessage = `<div class="medical-alert">${message}</div>`;
+        } else if (message.includes('warning') || message.includes('caution')) {
+            formattedMessage = `<div class="medical-warning">${message}</div>`;
+        } else if (message.includes('advice') || message.includes('recommend')) {
+            formattedMessage = `<div class="medical-advice">${message}</div>`;
+        }
+        
+        messageDiv.innerHTML = `
+            <div class="message-avatar bot-avatar">D</div>
+            <div class="message-content">
+                <div class="message-sender">Dr. GenZ</div>
+                <div>${formattedMessage}</div>
+            </div>
+        `;
+    }
+    
+    messagesContainer.appendChild(messageDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+function showTypingIndicator() {
+    if (typingIndicator) {
+        typingIndicator.style.display = 'flex';
+        statusDot.classList.add('thinking');
+    }
+}
+
+function hideTypingIndicator() {
+    if (typingIndicator) {
+        typingIndicator.style.display = 'none';
+        statusDot.classList.remove('thinking');
+    }
+}
+
+function updateSpecialty() {
+    if (!specialtyIndicator) return;
+    
+    const specialty = modelSelect ? modelSelect.value : 'general';
+    let specialtyText = '';
+    
+    switch(specialty) {
+        case 'general':
+            specialtyText = 'General Medicine';
+            break;
+        case 'pediatrics':
+            specialtyText = 'Pediatrics';
+            break;
+        case 'cardiology':
+            specialtyText = 'Cardiology';
+            break;
+        case 'dermatology':
+            specialtyText = 'Dermatology';
+            break;
+        case 'mental':
+            specialtyText = 'Mental Health';
+            break;
+    }
+    
+    specialtyIndicator.textContent = specialtyText;
+    
+    if (isChatStarted) {
+        const systemMsg = createSystemMessage();
+        if (systemMsg) {
+            conversationHistoryData[0] = systemMsg;
+            addMessage(`I've switched to ${specialtyText} mode. How can I assist you with your health concerns?`, false);
+            
+            if (isSpeechEnabled) {
+                speakResponse(`I've switched to ${specialtyText} mode. How can I assist you with your health concerns?`);
+            }
+        }
+    }
+}
+
+function speakResponse(text) {
+    if ('speechSynthesis' in window && isSpeechEnabled) {
+        // Stop any ongoing speech
+        window.speechSynthesis.cancel();
+        
+        const cleanText = text.replace(/[#*\[\]_`]/g, '');
+        const utterance = new SpeechSynthesisUtterance(cleanText);
+        
+        utterance.rate = 0.9;
+        utterance.pitch = 1.0;
+        utterance.volume = 0.8;
+        
+        utterance.onstart = function() {
+            if (statusText) statusText.textContent = "Dr. GenZ is speaking...";
+            // Change button to show stop functionality
+            if (toggleSpeechBtn) {
+                toggleSpeechBtn.querySelector('.voice-btn-text').textContent = 'Stop Speech';
+                const icon = toggleSpeechBtn.querySelector('i');
+                icon.classList.remove('fa-volume-up');
+                icon.classList.add('fa-stop');
+            }
+        };
+        
+        utterance.onend = function() {
+            if (statusText) statusText.textContent = "Waiting for your response";
+            if (statusDot) statusDot.classList.remove('thinking');
+            if (voiceInputBtn) voiceInputBtn.style.color = "";
+            if (userInput) userInput.focus();
+            hideTypingIndicator();
+            if (sendBtn) sendBtn.disabled = false;
+            
+            // Reset button to normal state
+            if (toggleSpeechBtn && isSpeechEnabled) {
+                toggleSpeechBtn.querySelector('.voice-btn-text').textContent = 'Voice: ON';
+                const icon = toggleSpeechBtn.querySelector('i');
+                icon.classList.remove('fa-stop');
+                icon.classList.add('fa-volume-up');
+            }
+        };
+        
+        utterance.onerror = function(event) {
+            console.error("Speech synthesis error:", event);
+            if (statusText) statusText.textContent = "Voice issue, but I've processed your request";
+            hideTypingIndicator();
+            if (sendBtn) sendBtn.disabled = false;
+            
+            // Reset button on error
+            if (toggleSpeechBtn && isSpeechEnabled) {
+                toggleSpeechBtn.querySelector('.voice-btn-text').textContent = 'Voice: ON';
+                const icon = toggleSpeechBtn.querySelector('i');
+                icon.classList.remove('fa-stop');
+                icon.classList.add('fa-volume-up');
+            }
+        };
+        
+        window.speechSynthesis.speak(utterance);
+    } else {
+        if (statusText) statusText.textContent = "Waiting for your response";
+        if (statusDot) statusDot.classList.remove('thinking');
+        if (userInput) userInput.focus();
+        hideTypingIndicator();
+        if (sendBtn) sendBtn.disabled = false;
+    }
+}
+
+function stopTalking() {
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        if (statusText) statusText.textContent = "Speech stopped";
+        
+        // Reset UI states
+        hideTypingIndicator();
+        if (sendBtn) sendBtn.disabled = false;
+        
+        // Show feedback that speech was stopped
+        if (messagesContainer) {
+            const feedback = document.createElement('div');
+            feedback.className = 'system-message';
+            feedback.textContent = "Speech stopped";
+            messagesContainer.appendChild(feedback);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        // Clear feedback after 2 seconds
+        setTimeout(() => {
+            if (statusText) statusText.textContent = "Waiting for your response";
+        }, 2000);
+    }
+}
+
+function toggleSpeech() {
+    // If speech is currently playing, stop it
+    if (window.speechSynthesis.speaking) {
+        stopTalking();
+        return;
+    }
+    
+    // Otherwise, toggle speech on/off as before
+    isSpeechEnabled = !isSpeechEnabled;
+    if (toggleSpeechBtn) {
+        toggleSpeechBtn.querySelector('.voice-btn-text').textContent = 
+            `Voice: ${isSpeechEnabled ? 'ON' : 'OFF'}`;
+        toggleSpeechBtn.style.backgroundColor = isSpeechEnabled ? '' : 'var(--text-muted)';
+        
+        // Update icon
+        const icon = toggleSpeechBtn.querySelector('i');
+        if (isSpeechEnabled) {
+            icon.classList.remove('fa-volume-mute');
+            icon.classList.add('fa-volume-up');
+        } else {
+            icon.classList.remove('fa-volume-up');
+            icon.classList.add('fa-volume-mute');
+        }
+    }
+}
+
+// Initialize voice visualization bars
+function initializeVoiceVisualizer() {
+    if (voiceVisualizer) {
+        voiceBars = Array.from(voiceVisualizer.querySelectorAll('.voice-bar'));
+    }
+}
+
+// Update voice visualization
+function updateVoiceVisualization(volume) {
+    if (!isVoiceActive) return;
+    
+    voiceBars.forEach((bar, index) => {
+        const shouldBeActive = index < Math.floor(volume / 10);
+        if (shouldBeActive) {
+            bar.classList.add('active');
+            bar.style.height = `${10 + (index * 5)}px`;
+        } else {
+            bar.classList.remove('active');
+            bar.style.height = '4px';
+        }
+    });
+}
+
+// Mobile sidebar toggle
+function toggleSidebar() {
+    isSidebarOpen = !isSidebarOpen;
+    if (sidebar) sidebar.classList.toggle('open', isSidebarOpen);
+    if (sidebarOverlay) sidebarOverlay.classList.toggle('active', isSidebarOpen);
+    
+    // Update menu icon
+    if (mobileMenuBtn) {
+        const menuIcon = mobileMenuBtn.querySelector('i');
+        if (isSidebarOpen) {
+            menuIcon.classList.remove('fa-bars');
+            menuIcon.classList.add('fa-times');
+        } else {
+            menuIcon.classList.remove('fa-times');
+            menuIcon.classList.add('fa-bars');
+        }
+    }
+}
+
+// ============================================
+// MAIN CHAT FUNCTIONS
+// ============================================
+
+function startChat() {
+    const userName = userNameInput.value.trim();
+    const userAge = userAgeInput.value.trim();
+    const userGender = userGenderSelect.value;
+    const userSpecialty = userSpecialtySelect.value;
+    
+    if (!userName) {
+        alert("Please enter your name to begin.");
+        return;
+    }
+    
+    if (!userAge) {
+        alert("Please enter your age for personalized medical advice.");
+        return;
+    }
+    
+    if (!userGender) {
+        alert("Please select your gender for appropriate medical guidance.");
+        return;
+    }
+    
+    // Set the specialty based on user selection
+    if (modelSelect) modelSelect.value = userSpecialty;
+    if (mobileModelSelect) mobileModelSelect.value = userSpecialty;
+    
+    try {
+        // Create user in database (simulated)
+        currentUser = {
+            id: 1,
+            name: userName,
+            age: parseInt(userAge),
+            gender: userGender
+        };
+        
+        // Save to localStorage
+        localStorage.setItem("userName", userName);
+        localStorage.setItem("userAge", userAge);
+        localStorage.setItem("userGender", userGender);
+        localStorage.setItem("userSpecialty", userSpecialty);
+        
+        // Create a new session (simulated)
+        currentSessionId = Date.now();
+        
+        // Hide welcome screen
+        if (welcomeScreen) welcomeScreen.style.display = 'none';
+        isChatStarted = true;
+        
+        // Set up the system message
+        const systemMessage = createSystemMessage();
+        conversationHistoryData = [systemMessage];
+        
+        // Add initial greeting from Dr. GenZ
+        addMessage(getInitialGreeting(), false);
+        
+        // Speak the greeting if speech is enabled
+        if (isSpeechEnabled) {
+            speakResponse(getInitialGreeting());
+        }
+        
+        if (statusText) statusText.textContent = `Consulting with ${userName}`;
+        
+        // Update specialty indicator
+        updateSpecialty();
+        
+    } catch (error) {
+        console.error('Failed to start chat:', error);
+        alert('Failed to initialize chat. Please try again.');
+    }
+}
+
+async function sendMessage() {
+    if (!isChatStarted) {
+        alert("Please complete the setup first.");
+        return;
+    }
+    
+    const message = userInput.value.trim();
+    if (!message) return;
+
+    // Comprehensive medical keywords array
+    const medicalKeywords = [
+    // Basic Medical Terms
+    'health', 'medicine', 'medical', 'symptom', 'pain', 'doctor', 'hospital',
+    'clinic', 'physician', 'nurse', 'patient', 'diagnosis', 'prognosis',
+    'examination', 'checkup', 'bored', 'boring', 'having', 'hey', 'guidance', 'counselling', 'who', 'greetings', 'how' , 'feeling', 'consultation', 'appointment', 'emergency',
+    
+    // Medications & Treatments
+    'medication', 'drug', 'pill', 'prescription', 'treatment', 'therapy',
+    'vaccine', 'vaccination', 'antibiotic', 'antiviral', 'antifungal',
+    'analgesic', 'painkiller', 'anti-inflammatory', 'steroid', 'insulin',
+    'chemotherapy', 'radiation', 'surgery', 'operation', 'recovery',
+    'rehabilitation', 'physical therapy', 'occupational therapy',
+    
+    // Mental & Emotional Health
+    'mental', 'emotional', 'psychological', 'psychiatric', 'therapy',
+    'counseling', 'psychologist', 'psychiatrist', 'therapist', 'counselor',
+    'stress', 'anxiety', 'depression', 'feeling', 'feel', 'emotion',
+    'sad', 'happy', 'angry', 'worried', 'scared', 'nervous', 'afraid',
+    'fear', 'panic', 'phobia', 'ocd', 'bipolar', 'schizophrenia', 'psychosis',
+    'trauma', 'ptsd', 'grief', 'loss', 'bereavement', 'mourning',
+    'lonely', 'isolated', 'overwhelmed', 'burnout', 'exhausted', 'fatigued',
+    'mood', 'mood swings', 'irritable', 'agitated', 'restless', 'lethargic',
+    'suicidal', 'self-harm', 'self-injury', 'eating disorder', 'anorexia',
+    'bulimia', 'binge', 'addiction', 'substance', 'alcohol', 'drug abuse',
+    'withdrawal', 'detox', 'recovery', 'sobriety', 'relapse',
+    
+    // Infectious Diseases
+    'cholera', 'malaria', 'dengue', 'covid', 'coronavirus', 'influenza',
+    'flu', 'tuberculosis', 'tb', 'hiv', 'aids', 'hepatitis', 'measles',
+    'mumps', 'rubella', 'chickenpox', 'shingles', 'herpes', 'hpv',
+    'strep', 'strep throat', 'meningitis', 'encephalitis', 'pneumonia',
+    'bronchitis', 'sinusitis', 'urinary infection', 'uti', 'sti', 'std',
+    'gonorrhea', 'syphilis', 'chlamydia', 'yeast infection', 'fungal',
+    'parasite', 'worm', 'tapeworm', 'ringworm', 'scabies', 'lice',
+    
+    // Chronic Diseases
+    'diabetes', 'cancer', 'heart disease', 'hypertension', 'high blood pressure',
+    'asthma', 'copd', 'arthritis', 'osteoporosis', 'osteopenia',
+    'alzheimer', 'dementia', 'parkinson', 'multiple sclerosis', 'ms',
+    'lupus', 'fibromyalgia', 'chronic fatigue', 'ibs', 'ibd',
+    'crohn', 'colitis', 'celiac', 'gluten', 'allergy', 'eczema', 'psoriasis',
+    'migraine', 'epilepsy', 'seizure', 'stroke', 'heart attack', 'mi',
+    'kidney disease', 'liver disease', 'cirrhosis', 'pancreatitis',
+    'thyroid', 'hypothyroidism', 'hyperthyroidism', 'hashimoto',
+    
+    // Common Symptoms & Complaints
+    'fever', 'headache', 'migraine', 'dizziness', 'vertigo', 'lightheaded',
+    'nausea', 'vomit', 'vomiting', 'diarrhea', 'constipation', 'bloating',
+    'gas', 'indigestion', 'heartburn', 'reflux', 'gerd', 'abdominal pain',
+    'stomach ache', 'cramps', 'bleeding', 'hemorrhage', 'bruise', 'bruising',
+    'swelling', 'edema', 'inflammation', 'redness', 'rash', 'hives',
+    'itch', 'itching', 'burning', 'stinging', 'numbness', 'tingling',
+    'weakness', 'fatigue', 'tired', 'exhausted', 'lethargy', 'malaise',
+    'insomnia', 'sleep', 'nightmare', 'night terror', 'sleepwalking',
+    'appetite', 'weight loss', 'weight gain', 'dehydration', 'thirst',
+    
+    // Body Systems & Organs
+    'heart', 'cardiac', 'lung', 'pulmonary', 'respiratory', 'breath',
+    'brain', 'neurological', 'nerve', 'nervous system', 'spinal',
+    'muscle', 'muscular', 'skeletal', 'bone', 'joint', 'ligament',
+    'tendon', 'skin', 'dermatological', 'hair', 'nail', 'eye',
+    'vision', 'visual', 'ear', 'hearing', 'auditory', 'nose',
+    'nasal', 'sinus', 'throat', 'oral', 'dental', 'tooth',
+    'gum', 'tongue', 'stomach', 'gastric', 'intestinal', 'bowel',
+    'liver', 'hepatic', 'kidney', 'renal', 'bladder', 'urinary',
+    'reproductive', 'genital', 'penis', 'vagina', 'vulva', 'ovary',
+    'uterine', 'cervical', 'prostate', 'testicular', 'breast',
+    
+    // Vital Signs & Measurements
+    'blood pressure', 'pulse', 'heart rate', 'respiratory rate',
+    'temperature', 'oxygen', 'saturation', 'spo2', 'glucose', 'sugar',
+    'cholesterol', 'triglyceride', 'hemoglobin', 'a1c', 'creatinine',
+    
+    // Diagnostic Terms
+    'x-ray', 'mri', 'ct scan', 'ultrasound', 'sonogram', 'biopsy',
+    'blood test', 'urine test', 'stool test', 'culture', 'sensitivity',
+    'biomarker', 'lab results', 'imaging', 'scan', 'screening',
+    
+    // Procedures & Interventions
+    'surgery', 'operation', 'procedure', 'incision', 'suture', 'stitch',
+    'dressing', 'bandage', 'cast', 'splint', 'injection', 'shot',
+    'iv', 'intravenous', 'drip', 'transfusion', 'dialysis', 'transplant',
+    
+    // Women's Health
+    'pregnancy', 'pregnant', 'prenatal', 'postpartum', 'menstrual',
+    'period', 'menstruation', 'pms', 'menopause', 'hormone', 'estrogen',
+    'progesterone', 'birth control', 'contraception', 'condom', 'iud',
+    'pap smear', 'mammogram', 'breast exam', 'pelvic exam', 'ovulation',
+    
+    // Men's Health
+    'testosterone', 'prostate', 'psa', 'erectile', 'impotence', 'viagra',
+    'circumcision', 'vasectomy', 'testicular', 'sperm', 'fertility',
+    
+    // Pediatric Health
+    'child', 'pediatric', 'baby', 'infant', 'toddler', 'adolescent',
+    'teen', 'puberty', 'growth', 'development', 'milestone', 'vaccine',
+    'immunization', 'well-child', 'checkup', 'circumcision',
+    
+    // Geriatric Health
+    'elderly', 'geriatric', 'aging', 'senior', 'memory', 'cognitive',
+    'mobility', 'balance', 'fall', 'fracture', 'hip', 'incontinence',
+    
+    // Lifestyle & Prevention
+    'exercise', 'fitness', 'workout', 'yoga', 'meditation', 'diet',
+    'nutrition', 'vitamin', 'mineral', 'supplement', 'herbal',
+    'sleep', 'rest', 'hygiene', 'sanitation', 'clean', 'wash',
+    'prevention', 'preventive', 'screening', 'early detection',
+    'quitting', 'smoking', 'alcohol', 'drug', 'substance',
+    
+    // Emergency & Urgent Conditions
+    'emergency', 'urgent', 'critical', 'severe', 'acute', 'sudden',
+    'unconscious', 'coma', 'seizure', 'convulsion', 'choking',
+    'suffocation', 'drowning', 'burn', 'electrocution', 'poison',
+    'overdose', 'allergic', 'anaphylaxis', 'shock', 'bleeding',
+    'hemorrhage', 'fracture', 'break', 'sprain', 'strain', 'dislocation',
+    
+    // Pain Types & Locations
+    'headache', 'migraine', 'neck pain', 'back pain', 'shoulder pain',
+    'arm pain', 'elbow pain', 'wrist pain', 'hand pain', 'chest pain',
+    'abdominal pain', 'stomach pain', 'pelvic pain', 'hip pain',
+    'leg pain', 'knee pain', 'ankle pain', 'foot pain', 'joint pain',
+    'muscle pain', 'nerve pain', 'sharp pain', 'dull pain', 'aching',
+    'throbbing', 'stabbing', 'burning', 'shooting', 'radiating',
+    
+    // Sensory Symptoms
+    'vision', 'blurry', 'double vision', 'blind', 'blindness',
+    'hearing', 'deaf', 'deafness', 'tinnitus', 'ringing',
+    'smell', 'taste', 'loss of smell', 'loss of taste',
+    
+    // Gastrointestinal Symptoms
+    'nausea', 'vomiting', 'diarrhea', 'constipation', 'bloating',
+    'gas', 'flatulence', 'belching', 'heartburn', 'indigestion',
+    'reflux', 'difficulty swallowing', 'dysphagia', 'blood in stool',
+    'black stool', 'mucus in stool', 'incontinence', 'hemorrhoid',
+    
+    // Respiratory Symptoms
+    'cough', 'sneeze', 'congestion', 'runny nose', 'nasal discharge',
+    'shortness of breath', 'dyspnea', 'wheezing', 'asthma attack',
+    'chest tightness', 'sputum', 'phlegm', 'blood in sputum',
+    
+    // Cardiovascular Symptoms
+    'chest pain', 'palpitation', 'irregular heartbeat', 'arrhythmia',
+    'rapid heartbeat', 'tachycardia', 'slow heartbeat', 'bradycardia',
+    'swelling', 'edema', 'leg swelling', 'shortness of breath',
+    
+    // Neurological Symptoms
+    'headache', 'dizziness', 'vertigo', 'fainting', 'syncope',
+    'seizure', 'convulsion', 'tremor', 'shaking', 'twitching',
+    'weakness', 'paralysis', 'numbness', 'tingling', 'paresthesia',
+    'memory loss', 'confusion', 'disorientation', 'speech difficulty',
+    'slurred speech', 'coordination problems', 'balance problems',
+    
+    // Skin & Dermatological
+    'rash', 'hives', 'urticaria', 'eczema', 'dermatitis', 'psoriasis',
+    'acne', 'pimple', 'boil', 'abscess', 'cyst', 'wart', 'mole',
+    'birthmark', 'freckle', 'skin cancer', 'melanoma', 'itching',
+    'pruritus', 'dry skin', 'oily skin', 'sweating', 'night sweats',
+    
+    // Endocrine & Metabolic
+    'thirst', 'hunger', 'appetite', 'weight', 'obesity', 'underweight',
+    'heat intolerance', 'cold intolerance', 'sweating', 'hair loss',
+    'growth', 'development', 'puberty', 'menstrual', 'fertility',
+    
+    // Urinary & Renal
+    'urination', 'frequency', 'urgency', 'incontinence', 'retention',
+    'painful urination', 'dysuria', 'blood in urine', 'hematuria',
+    'cloudy urine', 'foamy urine', 'kidney stone', 'renal colic',
+    
+    // Sexual & Reproductive
+    'libido', 'sex drive', 'erection', 'ejaculation', 'orgasm',
+    'pain during sex', 'dyspareunia', 'infertility', 'sterility',
+    'menstrual', 'period', 'pms', 'menopause', 'hot flash',
+    
+    // Psychological & Behavioral
+    'mood', 'affect', 'behavior', 'personality', 'cognition',
+    'concentration', 'attention', 'memory', 'learning', 'intelligence',
+    'perception', 'hallucination', 'delusion', 'paranoia', 'obsession',
+    'compulsion', 'impulse', 'addiction', 'dependence', 'withdrawal',
+    
+    // General Health States
+    'wellness', 'fitness', 'vitality', 'energy', 'fatigue', 'malaise',
+    'discomfort', 'distress', 'suffering', 'disability', 'handicap',
+    'recovery', 'healing', 'rehabilitation', 'convalescence', 'relapse',
+    
+    // Healthcare Settings
+    'hospital', 'clinic', 'office', 'emergency room', 'er', 'icu',
+    'ward', 'unit', 'department', 'pharmacy', 'laboratory', 'radiology',
+    
+    // Healthcare Professionals
+    'doctor', 'physician', 'surgeon', 'specialist', 'nurse', 'rn',
+    'therapist', 'counselor', 'psychologist', 'psychiatrist', 'dentist',
+    'optometrist', 'pharmacist', 'technician', 'assistant', 'aide',
+    
+    // Medical Equipment
+    'stethoscope', 'thermometer', 'bp cuff', 'glucometer', 'inhaler',
+    'nebulizer', 'walker', 'cane', 'wheelchair', 'crutch', 'brace',
+    
+    // Alternative Medicine
+    'acupuncture', 'chiropractic', 'homeopathy', 'ayurveda', 'herbal',
+    'supplement', 'vitamin', 'mineral', 'aromatherapy', 'massage',
+    
+    // Public Health
+    'epidemic', 'pandemic', 'outbreak', 'quarantine', 'isolation',
+    'contact tracing', 'herd immunity', 'vaccination', 'immunization',
+    
+    // Medical Specialties
+    'cardiology', 'dermatology', 'endocrinology', 'gastroenterology',
+    'hematology', 'infectious disease', 'nephrology', 'neurology',
+    'oncology', 'ophthalmology', 'orthopedics', 'otolaryngology',
+    'pediatrics', 'psychiatry', 'pulmonology', 'rheumatology',
+    'urology', 'gynecology', 'obstetrics', 'geriatrics'
+];
+    
+    
+    const hasMedicalKeyword = medicalKeywords.some(keyword => 
+        message.toLowerCase().includes(keyword.toLowerCase())
+    );
+    
+    if (!hasMedicalKeyword) {
+        addMessage(`I specialize only in health, medication, and emotional well-being topics. Please ask me about medical concerns, symptoms, medications, or emotional health issues.`, false);
+        userInput.value = '';
+        userInput.style.height = 'auto';
+        if (isSpeechEnabled) {
+            speakResponse("I specialize only in health, medication, and emotional well-being topics. Please ask me about medical concerns, symptoms, medications, or emotional health issues.");
+        }
+        return;
+    }
+    
+    // Check for emergency keywords
+    const emergencyKeywords = ['heart attack', 'stroke', 'chest pain', 'difficulty breathing', 'severe bleeding', 'unconscious', 'suicidal'];
+    const hasEmergency = emergencyKeywords.some(keyword => 
+        message.toLowerCase().includes(keyword.toLowerCase())
+    );
+    
+    if (hasEmergency) {
+        addMessage(`⚠️ MEDICAL EMERGENCY DETECTED: Based on your message, this may be a serious medical emergency. Please call your local emergency services (like 911) immediately or go to the nearest emergency room. Do not wait for a response from me.`, false);
+        if (isSpeechEnabled) {
+            speakResponse("MEDICAL EMERGENCY DETECTED. Please call your local emergency services immediately or go to the nearest emergency room. Do not wait for a response from me.");
+        }
+    }
+    
+    // Add user message to chat
+    addMessage(message, true);
+    userInput.value = '';
+    userInput.style.height = 'auto';
+    
+    // Add to conversation history
+    conversationHistoryData.push({
+        role: "user",
+        content: message
+    });
+    
+    // Show typing indicator
+    showTypingIndicator();
+    if (statusText) statusText.textContent = "Dr. GenZ is analyzing your symptoms...";
+    if (sendBtn) sendBtn.disabled = true;
+    
+    try {
+        // Update system message with current specialty
+        conversationHistoryData[0] = createSystemMessage();
+        
+        // Call Groq API
+        const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
+        const API_KEY = "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";
+        
+        const response = await fetch(GROQ_API_URL, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${API_KEY}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                messages: conversationHistoryData,
+                model: "openai/gpt-oss-120b",
+                temperature: 0.7,
+                max_tokens: 1024,
+                stream: false
+            })
+        });
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`API error: ${response.status} - ${errorText}`);
+        }
+        
+        const data = await response.json();
+        
+        // Extract the generated text from the response
+        let botResponse = "I'm having trouble processing your request right now. Could you please rephrase your question?";
+        if (data && data.choices && data.choices[0] && data.choices[0].message) {
+            botResponse = data.choices[0].message.content;
+            
+            // Add to conversation history
+            conversationHistoryData.push({
+                role: "assistant",
+                content: botResponse
+            });
+            
+            // Limit conversation history to prevent token overflow
+            if (conversationHistoryData.length > 12) {
+                conversationHistoryData = [
+                    conversationHistoryData[0], // Keep system message
+                    ...conversationHistoryData.slice(-10) // Keep last 10 exchanges
+                ];
+            }
+        }
+        
+        // Add bot response to chat
+        addMessage(botResponse);
+        
+        // Speak the response if enabled
+        if (isSpeechEnabled) {
+            speakResponse(botResponse);
+        } else {
+            if (statusText) statusText.textContent = "Waiting for your response";
+            hideTypingIndicator();
+            if (sendBtn) sendBtn.disabled = false;
+        }
+        
+    } catch (error) {
+        console.error("Error:", error);
+        hideTypingIndicator();
+        
+        // Fallback response if API fails
+        const fallbackResponses = [
+            "I'm experiencing technical difficulties right now. Please try again in a moment.",
+            "There seems to be a connection issue. Let's try that again.",
+            "I apologize, but I'm having trouble processing your request. Could you please rephrase your question?"
+        ];
+        
+        const randomResponse = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
+        addMessage(randomResponse);
+        if (statusText) statusText.textContent = "Connection issue - please try again";
+        if (sendBtn) sendBtn.disabled = false;
+    }
+}
+
+function startNewChat() {
+    if (confirm("Are you sure you want to start a new chat? Your current conversation will be lost.")) {
+        // Clear conversation history
+        conversationHistoryData = [createSystemMessage()];
+        
+        // Clear messages container
+        if (messagesContainer) messagesContainer.innerHTML = '';
+        
+        // Add new greeting
+        addMessage("Hello! I'm Dr. GenZ. How can I assist you with your health concerns today?", false);
+        
+        if (isSpeechEnabled) {
+            speakResponse("Hello! I'm Dr. GenZ. How can I assist you with your health concerns today?");
+        }
+    }
+}
+
+// ============================================
+// INITIALIZATION & AUTO-START
+// ============================================
+
+function initializeApp() {
+    // Auto-resize textarea
+    if (userInput) {
+        userInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+    }
+
+    // Mobile sidebar toggle
+    if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', toggleSidebar);
+    if (sidebarOverlay) sidebarOverlay.addEventListener('click', toggleSidebar);
+
+    // Close sidebar when clicking on a history item (mobile)
+    document.querySelectorAll('.history-item').forEach(item => {
+        item.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                toggleSidebar();
+            }
+        });
+    });
+
+    // Speech Recognition Setup
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition;
+    let isListening = false;
+
+    if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = true;
+        recognition.lang = 'en-US';
+        
+        recognition.onstart = function() {
+            if (statusText) statusText.textContent = "Listening... Please describe your symptoms";
+            if (voiceInputBtn) voiceInputBtn.style.color = "#ef4444";
+            if (startVoiceBtn) startVoiceBtn.classList.add('active');
+            if (stopVoiceBtn) stopVoiceBtn.disabled = false;
+            isListening = true;
+            isVoiceActive = true;
+            if (voiceVisualizer) voiceVisualizer.style.display = 'flex';
+            if (voiceRecordingIndicator) voiceRecordingIndicator.style.display = 'block';
+        };
+        
+        recognition.onresult = function(event) {
+            const transcript = Array.from(event.results)
+                .map(result => result[0])
+                .map(result => result.transcript)
+                .join('');
+            
+            if (userInput) {
+                userInput.value = transcript;
+                userInput.dispatchEvent(new Event('input'));
+            }
+            
+            // Simulate voice visualization based on transcript length
+            const volume = Math.min(100, transcript.length * 2);
+            updateVoiceVisualization(volume);
+        };
+        
+        recognition.onerror = function(event) {
+            console.error("Speech recognition error:", event.error);
+            if (statusText) statusText.textContent = "Error: " + event.error;
+            if (voiceInputBtn) voiceInputBtn.style.color = "";
+            if (startVoiceBtn) startVoiceBtn.classList.remove('active');
+            if (stopVoiceBtn) stopVoiceBtn.disabled = true;
+            isListening = false;
+            isVoiceActive = false;
+            if (voiceVisualizer) voiceVisualizer.style.display = 'none';
+            if (voiceRecordingIndicator) voiceRecordingIndicator.style.display = 'none';
+        };
+        
+        recognition.onend = function() {
+            if (isListening) {
+                if (statusText) statusText.textContent = "Processing your symptoms...";
+                if (voiceInputBtn) voiceInputBtn.style.color = "";
+                if (startVoiceBtn) startVoiceBtn.classList.remove('active');
+                if (stopVoiceBtn) stopVoiceBtn.disabled = true;
+                isListening = false;
+                isVoiceActive = false;
+                if (voiceVisualizer) voiceVisualizer.style.display = 'none';
+                if (voiceRecordingIndicator) voiceRecordingIndicator.style.display = 'none';
+                
+                // Auto-send if there's text
+                if (userInput && userInput.value.trim()) {
+                    setTimeout(() => {
+                        sendMessage();
+                    }, 500);
+                }
+            }
+        };
+        
+        // Speech control functions
+        function toggleVoiceRecognition() {
+            if (!SpeechRecognition) {
+                if (statusText) statusText.textContent = "Speech recognition not supported in your browser";
+                return;
+            }
+            
+            if (isListening) {
+                recognition.stop();
+            } else {
+                if (userInput) {
+                    userInput.value = '';
+                    userInput.dispatchEvent(new Event('input'));
+                }
+                recognition.start();
+            }
+        }
+        
+        function startVoiceRecognition() {
+            if (!SpeechRecognition) {
+                if (statusText) statusText.textContent = "Speech recognition not supported in your browser";
+                return;
+            }
+            
+            if (userInput) {
+                userInput.value = '';
+                userInput.dispatchEvent(new Event('input'));
+            }
+            recognition.start();
+        }
+        
+        function stopVoiceRecognition() {
+            if (isListening) {
+                recognition.stop();
+            }
+        }
+        
+        // Attach voice event listeners
+        if (voiceInputBtn) voiceInputBtn.addEventListener('click', toggleVoiceRecognition);
+        if (startVoiceBtn) startVoiceBtn.addEventListener('click', startVoiceRecognition);
+        if (stopVoiceBtn) stopVoiceBtn.addEventListener('click', stopVoiceRecognition);
+    } else {
+        if (voiceInputBtn) voiceInputBtn.disabled = true;
+        if (startVoiceBtn) startVoiceBtn.disabled = true;
+        if (voiceInputBtn) voiceInputBtn.title = "Speech Recognition not supported in your browser";
+        if (startVoiceBtn) startVoiceBtn.title = "Speech Recognition not supported in your browser";
+    }
+
+    // Event Listeners
+    if (startChatBtn) startChatBtn.addEventListener('click', startChat);
+    if (sendBtn) sendBtn.addEventListener('click', sendMessage);
+    if (userInput) {
+        userInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+    }
+
+    if (toggleSpeechBtn) toggleSpeechBtn.addEventListener('click', toggleSpeech);
+    if (newChatBtn) newChatBtn.addEventListener('click', startNewChat);
+
+    // Sync specialty selectors
+    if (modelSelect) {
+        modelSelect.addEventListener('change', function() {
+            if (mobileModelSelect) mobileModelSelect.value = this.value;
+            updateSpecialty();
+        });
+    }
+
+    if (mobileModelSelect) {
+        mobileModelSelect.addEventListener('change', function() {
+            if (modelSelect) modelSelect.value = this.value;
+            updateSpecialty();
+        });
+    }
+
+    // Medical tool button event listeners
+    const setupMedicalTool = (btn, userMessage, botMessage) => {
+        if (btn) {
+            btn.addEventListener('click', function() {
+                if (!isChatStarted) {
+                    alert("Please complete the setup first.");
+                    return;
+                }
+                addMessage(userMessage, true);
+                setTimeout(() => {
+                    addMessage(botMessage, false);
+                    if (isSpeechEnabled) {
+                        speakResponse(botMessage.split('.')[0] + '.');
+                    }
+                }, 500);
+            });
+        }
+    };
+
+    setupMedicalTool(
+        symptomCheckerBtn,
+        "I'd like to use the symptom checker. What symptoms should I describe?",
+        "Of course. Please describe all your symptoms in detail, including when they started, their severity, and any factors that make them better or worse."
+    );
+
+    setupMedicalTool(
+        healthTrackerBtn,
+        "I want to track my health data.",
+        "Excellent. I can help you track various health metrics. Please share your current vitals like blood pressure, heart rate, weight, or any medications you're taking. You can also ask me to set reminders for medications or appointments."
+    );
+
+    setupMedicalTool(
+        diagnosticAssistantBtn,
+        "I need help interpreting diagnostic results.",
+        "I can assist with understanding lab results or diagnostic reports. Please share the details of your test results, and I'll help explain what they might indicate. Remember, I can provide information but not medical diagnoses."
+    );
+
+    setupMedicalTool(
+        preventiveCareBtn,
+        "I'd like preventive health advice.",
+        "Preventive care is essential for long-term health. Tell me about your lifestyle - diet, exercise, sleep patterns, stress levels, and any family medical history. I'll provide personalized recommendations for maintaining your health."
+    );
+
+    setupMedicalTool(
+        medicationBtn,
+        "I have questions about medications.",
+        "I can provide information about medications, their uses, side effects, and interactions. Please tell me which medication you're asking about or describe your medication concerns. Remember to always consult with a healthcare provider before making any changes to your medications."
+    );
+
+    // Add keyboard shortcut (Esc key) to stop speech
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && isSpeechEnabled) {
+            stopTalking();
+        }
+    });
+
+    // Initialize the voice visualizer
+    initializeVoiceVisualizer();
+
+    // Handle window resize
+    window.addEventListener('resize', function() {
+        // Close sidebar on resize to desktop if open
+        if (window.innerWidth > 768 && isSidebarOpen) {
+            toggleSidebar();
+        }
+    });
+    
+    // Now that everything is initialized, check for saved user data
+    autoStartChat();
+}
+
+function autoStartChat() {
+    // Load saved data
+    const savedName = localStorage.getItem("userName");
+    const savedAge = localStorage.getItem("userAge");
+    const savedGender = localStorage.getItem("userGender");
+    const savedSpecialty = localStorage.getItem("userSpecialty");
+
+    // Populate form fields
+    if (userNameInput && savedName) userNameInput.value = savedName;
+    if (userAgeInput && savedAge) userAgeInput.value = savedAge;
+    if (userGenderSelect && savedGender) userGenderSelect.value = savedGender;
+    if (userSpecialtySelect && savedSpecialty) userSpecialtySelect.value = savedSpecialty;
+
+    // Auto-start chat if all required fields are filled
+    if (savedName && savedAge && savedGender) {
+        // Populate currentUser for the chat system
+        currentUser = {
+            id: 1,
+            name: savedName,
+            age: parseInt(savedAge),
+            gender: savedGender
+        };
+        
+        // Set the specialty based on saved selection
+        if (modelSelect) modelSelect.value = savedSpecialty || 'general';
+        if (mobileModelSelect) mobileModelSelect.value = savedSpecialty || 'general';
+        
+        // Create a new session (simulated)
+        currentSessionId = Date.now();
+        
+        // Hide welcome screen and show chat interface
+        if (welcomeScreen) welcomeScreen.style.display = 'none';
+        isChatStarted = true;
+        
+        // Set up the system message
+        const systemMessage = createSystemMessage();
+        if (systemMessage) {
+            conversationHistoryData = [systemMessage];
+            
+            // Add initial greeting from Dr. GenZ
+            const greeting = getInitialGreeting();
+            addMessage(greeting, false);
+            
+            // Speak the greeting if speech is enabled
+            if (isSpeechEnabled) {
+                speakResponse(greeting);
+            }
+            
+            if (statusText) statusText.textContent = `Consulting with ${savedName}`;
+            
+            // Update specialty indicator
+            updateSpecialty();
+            
+            // Focus on the input field for immediate typing
+            setTimeout(() => {
+                if (userInput) userInput.focus();
+            }, 500);
+            
+            // Add a welcome back message
+            setTimeout(() => {
+                const welcomeBack = `Welcome back, ${savedName}! I have your previous information loaded. How can I assist you today?`;
+                addMessage(welcomeBack, false);
+                if (isSpeechEnabled) {
+                    speakResponse(welcomeBack);
+                }
+            }, 1000);
+        }
+    }
+}
+
+// Save data automatically whenever a field changes
+function saveUserInfo() {
+    if (userNameInput) localStorage.setItem("userName", userNameInput.value);
+    if (userAgeInput) localStorage.setItem("userAge", userAgeInput.value);
+    if (userGenderSelect) localStorage.setItem("userGender", userGenderSelect.value);
+    if (userSpecialtySelect) localStorage.setItem("userSpecialty", userSpecialtySelect.value);
+}
+
+// Add listeners to all fields for auto-save
+if (userNameInput) userNameInput.addEventListener("input", saveUserInfo);
+if (userAgeInput) userAgeInput.addEventListener("input", saveUserInfo);
+if (userGenderSelect) userGenderSelect.addEventListener("change", saveUserInfo);
+if (userSpecialtySelect) userSpecialtySelect.addEventListener("change", saveUserInfo);
+
+// Optional: Save again when clicking "Start Consultation"
+if (startChatBtn) startChatBtn.addEventListener("click", saveUserInfo);
+
+// Initialize the app when DOM is fully loaded
+document.addEventListener('DOMContentLoaded', initializeApp);
+
+document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                document.getElementById('prescription-form').dispatchEvent(new Event('submit'));
+            }
+        });
+
+          // Security shortcuts disabled
+  document.addEventListener('contextmenu', function (e) {
+    e.preventDefault();
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (
+      e.key === "F12" ||
+      (e.ctrlKey && e.shiftKey && e.key === "I") ||
+      (e.ctrlKey && e.key === "U")
+    ) {
+      e.preventDefault();
+      alert("Action disabled");
     }
   });
-
-  window.addEventListener("scroll", function() {
-    let scrollDepth = Math.round((window.scrollY + window.innerHeight) / document.body.scrollHeight * 100);
-    if (scrollDepth >= 25 && !window.scroll25) { gtag("event", "scroll_depth", {percent: 25}); window.scroll25 = true; }
-    if (scrollDepth >= 50 && !window.scroll50) { gtag("event", "scroll_depth", {percent: 50}); window.scroll50 = true; }
-    if (scrollDepth >= 75 && !window.scroll75) { gtag("event", "scroll_depth", {percent: 75}); window.scroll75 = true; }
-    if (scrollDepth >= 100 && !window.scroll100) { gtag("event", "scroll_depth", {percent: 100}); window.scroll100 = true; }
-  });
-</script>
-</head>
-
-<body>
-    <div class="mobile-header">
-        <button class="mobile-menu-btn" id="mobile-menu-btn">
-            <i class="fas fa-bars"></i>
-        </button>
-        <div class="mobile-title">Dr. GenZ</div>
-        <div style="width: 40px;"></div> 
-    </div>
-    
-    <div class="sidebar-overlay" id="sidebar-overlay"></div>
-    
-    <div class="voice-recording-indicator" id="voice-recording-indicator">
-        <i class="fas fa-microphone"></i>
-        <div>Listening... Speak now</div>
-    </div>
-    
-    <div class="app-container">
-        <div class="welcome-screen" id="welcome-screen">
-            <div class="welcome-content">
-                <h1 class="welcome-title">Dr. GenZ</h1>
-                <p class="welcome-subtitle">Your AI Smart Doctor, ready to provide personalized medical guidance and health insights. Please note: This is an AI assistant, not a replacement for professional medical care.</p>
-                
-                <div class="emergency-notice">
-                    <strong><i class="fas fa-exclamation-triangle"></i> Medical Emergency Notice:</strong> If you're experiencing a medical emergency, please call your local emergency services immediately.
-                </div>
-                
-                <div class="user-info-form" id="user-info-form">
-                    <div class="form-group">
-                        <label for="user-name"><i class="fas fa-user"></i> What's your name?</label>
-                        <input type="text" id="user-name" placeholder="Enter your name">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="user-age"><i class="fas fa-calendar-alt"></i> Your Age</label>
-                        <input type="number" id="user-age" placeholder="Enter your age" min="1" max="120">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="user-gender"><i class="fas fa-venus-mars"></i> Gender</label>
-                        <select id="user-gender">
-                            <option value="">Select your gender</option>
-                            <option value="female">Female</option>
-                            <option value="male">Male</option>
-                            <option value="other">Other</option>
-                            <option value="prefer-not-to-say">Prefer not to say</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="user-specialty"><i class="fas fa-stethoscope"></i> Preferred Specialty</label>
-                        <select id="user-specialty">
-                            <option value="general">General Medicine</option>
-                            <option value="pediatrics">Pediatrics</option>
-                            <option value="cardiology">Cardiology</option>
-                            <option value="dermatology">Dermatology</option>
-                            <option value="mental">Mental Health</option>
-                        </select>
-                    </div>
-                    
-                    <button class="start-chat-btn" id="start-chat-btn">
-                        <i class="fas fa-comment-medical"></i> Start Consultation
-                    </button>
-                </div>
-            </div>
-        </div>
-        
-        <div class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <div class="sidebar-logo">D</div>
-                <div class="sidebar-title">Dr. GenZ</div>
-            </div>
-
-            <div class="sidebar-links">
-                <a href="/about-us/" class="sidebar-link" id="about-us-link" target="_blank">
-                    <i class="fas fa-info-circle"></i>
-                    <span>About Us</span>
-                </a>
-                <a href="/privacy/" class="sidebar-link" id="privacy-link" target="_blank">
-                    <i class="fas fa-shield-alt"></i>
-                    <span>Privacy</span>
-                </a>
-                <a href="/contact-us/" class="sidebar-link" id="contact-us-link" target="_blank">
-                    <i class="fas fa-envelope"></i>
-                    <span>Contact Us</span>
-                </a>
-                <a href="/partnership/" class="sidebar-link" id="partnership-link" target="_blank">
-                    <i class="fas fa-handshake"></i>
-                    <span>Partnership</span>
-                </a>
-                <a href="partners.html" class="sidebar-link" id="partnership-link" target="_blank">
-                    <i class="fas fa-handshake"></i>
-                    <span>Partners</span>
-                </a>
-                
-                <a href="https://smartdr-hospital-management-system.onrender.com" class="sidebar-link" id="medication-tools-link" target="_blank">
-                    <i class="fas fa-tools"></i>
-                    <span>My Management System</span>
-                </a>
-                <a href="/smart-pharmacy/" class="sidebar-link" id="smart-pharmacy-link" target="_blank">
-                    <i class="fas fa-prescription-bottle-alt"></i>
-                    <span>Smart Pharmacy</span>
-                </a>
-                <a href="/doctors-plaza/" class="sidebar-link" id="doctors-plaza-link" target="_blank">
-                    <i class="fas fa-hospital"></i>
-                    <span>Doctors Plaza</span>
-                </a>
-            </div>
-            
-            <div class="sidebar-footer">
-                <div class="user-info">
-                    <div class="user-avatar">D</div>
-                    <div>
-                        <div style="font-weight: 600;">Dr. GenZ</div>
-                        <div style="font-size: 12px; color: var(--text-muted);">AI Medical Assistant</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="main-content">
-            <div class="chat-header">
-                <div class="chat-title">
-                    Dr. GenZ
-                    <div class="specialty-indicator" id="specialty-indicator">General Medicine</div>
-                </div>
-                <div class="model-selector">
-                    <label>Specialty:</label>
-                    <select id="model-select">
-                        <option value="general">General Medicine</option>
-                        <option value="pediatrics">Pediatrics</option>
-                        <option value="cardiology">Cardiology</option>
-                        <option value="dermatology">Dermatology</option>
-                        <option value="mental">Mental Health</option>
-                    </select>
-                </div>
-            </div>
-            
-            <div class="mobile-specialty-selector">
-                <select id="mobile-model-select">
-                    <option value="general">General Medicine</option>
-                    <option value="pediatrics">Pediatrics</option>
-                    <option value="cardiology">Cardiology</option>
-                    <option value="dermatology">Dermatology</option>
-                    <option value="mental">Mental Health</option>
-                </select>
-            </div>
-            
-            <div class="messages-container" id="messages-container">
-            </div>
-            
-            <div class="medical-tools">
-                <a href="/medication-tools/" class="tool-btn" id="medication-tools-btn" target="_blank">
-                    <i class="fas fa-tools"></i>
-                    <span>Medication Tools</span>
-                </a>
-                <a href="/smart-pharmacy/" class="tool-btn" id="smart-pharmacy-btn" target="_blank">
-                    <i class="fas fa-prescription-bottle-alt"></i>
-                    <span>Smart Pharmacy</span>
-                </a>
-                <a href="/doctors-plaza/" class="tool-btn" id="doctors-plaza-btn" target="_blank">
-                    <i class="fas fa-hospital"></i>
-                    <span>Doctors Plaza</span>
-                </a>
-            </div>
-            
-            <div class="input-container">
-                <div class="input-wrapper">
-                    <textarea class="user-input" id="user-input" placeholder="Describe your symptoms or health concerns..." rows="1"></textarea>
-                    <div class="input-buttons">
-                        <button class="input-btn" id="voice-input-btn" title="Voice Input">
-                            <i class="fas fa-microphone"></i>
-                        </button>
-                        <button class="input-btn send-btn" id="send-btn">
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="voice-controls">
-                    <button class="voice-btn" id="start-voice-btn">
-                        <i class="fas fa-microphone"></i>
-                        <span class="voice-btn-text">Voice Input</span>
-                    </button>
-                    <button class="voice-btn" id="stop-voice-btn" disabled>
-                        <i class=""></i>
-                        <span class="voice-btn-text"></span>
-                    </button>
-                    <button class="voice-btn" id="toggle-speech-btn">
-                        <i class="fas fa-volume-up"></i>
-                        <span class="voice-btn-text">Voice: ON</span>
-                    </button>
-                </div>
-                
-                <div class="voice-visualizer" id="voice-visualizer" style="display: none;">
-                    <div class="voice-bar"></div>
-                    <div class="voice-bar"></div>
-                    <div class="voice-bar"></div>
-                    <div class="voice-bar"></div>
-                    <div class="voice-bar"></div>
-                    <div class="voice-bar"></div>
-                    <div class="voice-bar"></div>
-                    <div class="voice-bar"></div>
-                    <div class="voice-bar"></div>
-                    <div class="voice-bar"></div>
-                </div>
-            </div>
-            
-            <div class="status-bar">
-                <div class="status">
-                    <div class="status-dot" id="status-dot"></div>
-                    <span id="status-text">Ready for consultation</span>
-                </div>
-                <div class="typing-indicator" id="typing-indicator" style="display: none;">
-                    <span>Dr. GenZ is analyzing</span>
-                    <div class="typing-dots">
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="script.js"></script>
-</body>
-</html>
