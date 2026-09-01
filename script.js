@@ -159,10 +159,65 @@ function getInitialGreeting() {
     return greetings[Math.floor(Math.random() * greetings.length)];
 }
 
-function addMessage(message, isUser = false) {
+// ============================================
+// RENDER MARKDOWN HELPER (for streaming)
+// ============================================
+function renderMarkdown(text) {
+    try {
+        if (typeof marked !== 'undefined') {
+            marked.setOptions({
+                breaks: true,
+                gfm: true,
+                sanitize: false,
+                headerIds: false
+            });
+            return marked.parse(text);
+        } else {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    } catch (e) {
+        console.warn('Markdown parsing failed, using plain text:', e);
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+}
+
+// ============================================
+// ADD MESSAGE – now supports appending
+// ============================================
+function addMessage(message, isUser = false, appendToLast = false) {
     if (!messagesContainer) return;
 
-    const messageDiv = document.createElement('div');
+    let messageDiv;
+
+    // If appending, update the last bot message
+    if (appendToLast) {
+        const lastMessage = messagesContainer.lastElementChild;
+        if (lastMessage && lastMessage.classList.contains('bot-message')) {
+            messageDiv = lastMessage;
+            const contentDiv = messageDiv.querySelector('.message-content > div:last-child');
+            if (contentDiv) {
+                let formattedMessage = renderMarkdown(message);
+                const msgLower = message.toLowerCase();
+                if (msgLower.includes('emergency') || msgLower.includes('urgent') || msgLower.includes('immediately')) {
+                    formattedMessage = `<div class="medical-alert">${formattedMessage}</div>`;
+                } else if (msgLower.includes('warning') || msgLower.includes('caution')) {
+                    formattedMessage = `<div class="medical-warning">${formattedMessage}</div>`;
+                } else if (msgLower.includes('advice') || msgLower.includes('recommend')) {
+                    formattedMessage = `<div class="medical-advice">${formattedMessage}</div>`;
+                }
+                contentDiv.innerHTML = formattedMessage;
+            }
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            return messageDiv;
+        }
+    }
+
+    // Create new message
+    messageDiv = document.createElement('div');
     messageDiv.classList.add('message');
     messageDiv.classList.add(isUser ? 'user-message' : 'bot-message');
 
@@ -175,47 +230,29 @@ function addMessage(message, isUser = false) {
             <div class="message-avatar user-avatar">${currentUser ? currentUser.name.charAt(0) : 'U'}</div>
         `;
     } else {
-        // ✅ Convert Markdown → HTML
-        let formattedMessage = message;
-        try {
-            // Configure marked for safe, clean output
-            marked.setOptions({
-                breaks: true,
-                gfm: true,
-                sanitize: false,      // we handle sanitization manually
-                headerIds: false
-            });
-            formattedMessage = marked.parse(message);
-        } catch (e) {
-            console.warn('Markdown parsing failed, using plain text:', e);
-            // fallback: escape HTML and treat as plain text
-            const div = document.createElement('div');
-            div.textContent = message;
-            formattedMessage = div.innerHTML;
-        }
-
-        // Now wrap with medical alert/warning/advice if needed (after rendering)
-        let finalHtml = formattedMessage;
-        const msgLower = message.toLowerCase(); // use original message for detection
+        // Convert Markdown → HTML
+        let formattedMessage = renderMarkdown(message);
+        const msgLower = message.toLowerCase();
         if (msgLower.includes('emergency') || msgLower.includes('urgent') || msgLower.includes('immediately')) {
-            finalHtml = `<div class="medical-alert">${formattedMessage}</div>`;
+            formattedMessage = `<div class="medical-alert">${formattedMessage}</div>`;
         } else if (msgLower.includes('warning') || msgLower.includes('caution')) {
-            finalHtml = `<div class="medical-warning">${formattedMessage}</div>`;
+            formattedMessage = `<div class="medical-warning">${formattedMessage}</div>`;
         } else if (msgLower.includes('advice') || msgLower.includes('recommend')) {
-            finalHtml = `<div class="medical-advice">${formattedMessage}</div>`;
+            formattedMessage = `<div class="medical-advice">${formattedMessage}</div>`;
         }
 
         messageDiv.innerHTML = `
             <div class="message-avatar bot-avatar">D</div>
             <div class="message-content">
                 <div class="message-sender">Dr. GenZ</div>
-                <div>${finalHtml}</div>
+                <div>${formattedMessage}</div>
             </div>
         `;
     }
 
     messagesContainer.appendChild(messageDiv);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    return messageDiv;
 }
 
 function showTypingIndicator() {
@@ -430,6 +467,193 @@ function toggleSidebar() {
 }
 
 // ============================================
+// STREAMING RESPONSE (token by token)
+// ============================================
+async function streamBotResponse(userMessage) {
+    // Add user message to chat (already done in sendMessage, but we'll do it again for safety)
+    // Actually we'll let sendMessage handle adding user message, but we'll push to history here
+    // We'll call this after sendMessage has added the user message.
+    // We'll just do the streaming part.
+    
+    // Show typing indicator
+    showTypingIndicator();
+    if (statusText) statusText.textContent = "Dr. GenZ is thinking...";
+    if (sendBtn) sendBtn.disabled = true;
+    
+    try {
+        // Update system message with current specialty
+        conversationHistoryData[0] = createSystemMessage();
+        
+        const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
+        const API_KEY = "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";
+        
+        const response = await fetch(GROQ_API_URL, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${API_KEY}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                messages: conversationHistoryData,
+                model: "openai/gpt-oss-120b",
+                temperature: 0.7,
+                max_tokens: 1024,
+                stream: true   // ENABLE STREAMING
+            })
+        });
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`API error: ${response.status} - ${errorText}`);
+        }
+        
+        // Create a placeholder bot message
+        let fullContent = "";
+        const messageDiv = addMessage("", false); // empty bot message
+        // Find the content div inside the message
+        let contentDiv = messageDiv.querySelector('.message-content > div:last-child');
+        
+        // Read the stream
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder("utf-8");
+        let buffer = "";
+        
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            
+            buffer += decoder.decode(value, { stream: true });
+            // Process complete events (SSE)
+            const lines = buffer.split("\n");
+            buffer = lines.pop() || "";
+            
+            for (const line of lines) {
+                if (line.startsWith("data: ")) {
+                    const data = line.slice(6);
+                    if (data === "[DONE]") continue;
+                    try {
+                        const parsed = JSON.parse(data);
+                        const delta = parsed.choices?.[0]?.delta?.content;
+                        if (delta) {
+                            fullContent += delta;
+                            // Update the message content with markdown
+                            if (contentDiv) {
+                                let formatted = renderMarkdown(fullContent);
+                                const lower = fullContent.toLowerCase();
+                                if (lower.includes('emergency') || lower.includes('urgent') || lower.includes('immediately')) {
+                                    formatted = `<div class="medical-alert">${formatted}</div>`;
+                                } else if (lower.includes('warning') || lower.includes('caution')) {
+                                    formatted = `<div class="medical-warning">${formatted}</div>`;
+                                } else if (lower.includes('advice') || lower.includes('recommend')) {
+                                    formatted = `<div class="medical-advice">${formatted}</div>`;
+                                }
+                                contentDiv.innerHTML = formatted;
+                            }
+                            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                        }
+                    } catch (e) {
+                        // ignore parsing errors for incomplete chunks
+                    }
+                }
+            }
+        }
+        
+        // After stream ends, add the full content to history
+        if (fullContent) {
+            conversationHistoryData.push({ role: "assistant", content: fullContent });
+            if (conversationHistoryData.length > 12) {
+                conversationHistoryData = [
+                    conversationHistoryData[0],
+                    ...conversationHistoryData.slice(-10)
+                ];
+            }
+        } else {
+            // If no content, use fallback
+            fullContent = "I'm having trouble processing your request right now. Could you please rephrase your question?";
+            addMessage(fullContent, false);
+        }
+        
+        // Hide typing indicator
+        hideTypingIndicator();
+        if (statusText) statusText.textContent = "Waiting for your response";
+        if (sendBtn) sendBtn.disabled = false;
+        
+        // Speak the full response if enabled
+        if (isSpeechEnabled && fullContent) {
+            speakResponse(fullContent);
+        }
+        
+    } catch (error) {
+        console.error("Streaming error:", error);
+        hideTypingIndicator();
+        if (statusText) statusText.textContent = "Error: " + error.message;
+        if (sendBtn) sendBtn.disabled = false;
+        
+        // Fallback to non-streaming
+        await sendMessageFallback(userMessage);
+    }
+}
+
+// ============================================
+// FALLBACK NON-STREAMING (if streaming fails)
+// ============================================
+async function sendMessageFallback(userMessage) {
+    try {
+        const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
+        const API_KEY = "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";
+        const response = await fetch(GROQ_API_URL, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${API_KEY}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                messages: conversationHistoryData,
+                model: "openai/gpt-oss-120b",
+                temperature: 0.7,
+                max_tokens: 10204,
+                stream: false
+            })
+        });
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`API error: ${response.status} - ${errorText}`);
+        }
+        const data = await response.json();
+        let botResponse = "I'm having trouble processing your request right now. Could you please rephrase your question?";
+        if (data && data.choices && data.choices[0] && data.choices[0].message) {
+            botResponse = data.choices[0].message.content;
+            conversationHistoryData.push({ role: "assistant", content: botResponse });
+            if (conversationHistoryData.length > 12) {
+                conversationHistoryData = [
+                    conversationHistoryData[0],
+                    ...conversationHistoryData.slice(-10)
+                ];
+            }
+        }
+        addMessage(botResponse, false);
+        if (isSpeechEnabled) speakResponse(botResponse);
+        else {
+            if (statusText) statusText.textContent = "Waiting for your response";
+            hideTypingIndicator();
+            if (sendBtn) sendBtn.disabled = false;
+        }
+    } catch (error) {
+        console.error("Fallback error:", error);
+        hideTypingIndicator();
+        const fallbackResponses = [
+            "I'm experiencing technical difficulties right now. Please try again in a moment.",
+            "There seems to be a connection issue. Let's try that again.",
+            "I apologize, but I'm having trouble processing your request. Could you please rephrase your question?"
+        ];
+        const randomResponse = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
+        addMessage(randomResponse, false);
+        if (statusText) statusText.textContent = "Connection issue - please try again";
+        if (sendBtn) sendBtn.disabled = false;
+    }
+}
+
+// ============================================
 // MAIN CHAT FUNCTIONS
 // ============================================
 
@@ -503,6 +727,9 @@ function startChat() {
     }
 }
 
+// ============================================
+// UPDATED sendMessage – now uses streaming
+// ============================================
 async function sendMessage() {
     if (!isChatStarted) {
         alert("Please complete the setup first.");
@@ -524,8 +751,112 @@ async function sendMessage() {
     'vaccine', 'vaccination', 'antibiotic', 'antiviral', 'antifungal',
     'analgesic', 'painkiller', 'anti-inflammatory', 'steroid', 'insulin',
     'chemotherapy', 'radiation', 'surgery', 'operation', 'recovery',
-    'rehabilitation', 'physical therapy', 'occupational therapy',
-    
+    'rehabilitation', 'physical therapy', 'occupational therapy', 'gallbladder', 'appendix', 'spleen', 'splenic', 'pancreas', 'thyroid',
+'parathyroid', 'adrenal', 'pituitary', 'hypothalamus', 'thymus',
+'lymph node', 'lymphatic', 'peritoneum', 'pleura', 'pleural',
+'pericardium', 'myocardium', 'endocardium', 'aorta', 'carotid',
+'femoral', 'popliteal', 'meniscus', 'rotator cuff', 'acl', 'mcl',
+'sciatic', 'trigeminal', 'vagus', 'phrenic', 'glossopharyngeal',
+'hypoglossal', 'accessory', 'femoral', 'peroneal', 'tibial', 'radial',
+'ulnar', 'median', 'axillary', 'brachial', 'celiac', 'mesenteric',
+'renal artery', 'iliac', 'sacral', 'coccyx', 'coccygeal', 'ischium',
+'pubis', 'ilium', 'sacrum', 'coccyx', 'patella', 'scapula', 'clavicle',
+'sternum', 'rib', 'coccyx', 'mandible', 'maxilla', 'zygomatic', 'frontal',
+'parietal', 'occipital', 'temporal', 'sphenoid', 'ethmoid', 'menarche', 'first period', 'dysmenorrhea', 'painful periods',
+'amenorrhea', 'absent periods', 'oligomenorrhea', 'irregular periods',
+'menorrhagia', 'heavy bleeding', 'metrorrhagia', 'breakthrough bleeding',
+'fibroids', 'uterine fibroids', 'endometrial', 'endometrial hyperplasia',
+'ovarian cyst', 'cyst rupture', 'ectopic pregnancy', 'tubal pregnancy',
+'miscarriage', 'spontaneous abortion', 'stillbirth', 'preeclampsia',
+'eclampsia', 'gestational diabetes', 'placenta previa', 'placental abruption',
+'c-section', 'cesarean', 'episiotomy', 'perineal tear', 'mastitis',
+'breast abscess', 'galactocele', 'nipple discharge', 'cervical ectropion',
+'cervical polyp', 'endometrial polyp', 'vulvar dermatosis', 'lichen sclerosus',
+'lichen planus', 'vulvitis', 'bartholin cyst', 'bartholin abscess', 'leukemia', 'lymphoma', 'hodgkin', 'non-hodgkin', 'multiple myeloma',
+'myelodysplastic', 'myeloproliferative', 'polycythemia', 'essential thrombocythemia',
+'myelofibrosis', 'sarcoma', 'osteosarcoma', 'chondrosarcoma', 'liposarcoma',
+'leiomyosarcoma', 'rhabdomyosarcoma', 'gastrointestinal stromal', 'gist',
+'neuroblastoma', 'retinoblastoma', 'glioblastoma', 'astrocytoma',
+'oligodendroglioma', 'meningioma', 'schwannoma', 'acoustic neuroma',
+'pituitary adenoma', 'paraganglioma', 'pheochromocytoma', 'thymoma',
+'mesothelioma', 'transitional cell', 'urothelial', 'hepatocellular', 'hcc',
+'cholangiocarcinoma', 'bile duct', 'carcinoid', 'neuroendocrine',
+'pancreatic neuroendocrine', 'penile', 'anal', 'vulvar', 'vaginal',
+'fallopian tube', 'peritoneal', 'carcinoma in situ', 'cis', 'dcis', 'lcis', 'acetaminophen', 'tylenol', 'paracetamol', 'ibuprofen', 'advil', 'motrin',
+'aspirin', 'naproxen', 'aleve', 'omeprazole', 'prilosec', 'pantoprazole',
+'metformin', 'glucophage', 'lisinopril', 'amlodipine', 'atorvastatin',
+'lipitor', 'rosuvastatin', 'crestor', 'levothyroxine', 'synthroid',
+'warfarin', 'coumadin', 'heparin', 'enoxaparin', 'clopidogrel', 'plavix',
+'digoxin', 'nitroglycerin', 'albuterol', 'ventolin', 'fluticasone',
+'prednisone', 'hydrocortisone', 'dexamethasone', 'fluoxetine', 'prozac',
+'sertraline', 'zoloft', 'escitalopram', 'lexapro', 'duloxetine', 'cymbalta',
+'venlafaxine', 'effexor', 'bupropion', 'wellbutrin', 'lorazepam', 'ativan',
+'diazepam', 'valium', 'alprazolam', 'xanax', 'clonazepam', 'klonopin',
+'zolpidem', 'ambien', 'trazodone', 'quetiapine', 'seroquel', 'olanzapine',
+'risperidone', 'haloperidol', 'haldol', 'lithium', 'carbamazepine',
+'valproate', 'depakote', 'lamotrigine', 'lamictal', 'gabapentin', 'neurontin',
+'pregabalin', 'lyrica', 'tramadol', 'ultram', 'hydrocodone', 'vicodin',
+'oxycodone', 'percocet', 'morphine', 'fentanyl', 'methadone', 'buprenorphine',
+'suboxone', 'naloxone', 'naltrexone', 'disulfiram', 'antabuse',
+'methotrexate', 'hydroxychloroquine', 'plaquenil', 'sulfasalazine',
+'azathioprine', 'cyclosporine', 'tacrolimus', 'mycophenolate',
+'ivig', 'immunoglobulin', 'chemotherapy', 'immunotherapy', 'targeted therapy',
+'radiation therapy', 'radiotherapy', 'chills', 'rigors', 'jaundice', 'yellowing', 'pallor', 'pale skin',
+'cyanosis', 'clubbing', 'clubbed fingers', 'edema', 'swollen ankles',
+'ascites', 'chest tightness', 'palpitations', 'racing heart',
+'skipped beat', 'extra heartbeat', 'hemoptysis', 'coughing blood',
+'hematemesis', 'vomiting blood', 'melena', 'black tarry stool',
+'hematochezia', 'blood in stool', 'epistaxis', 'nosebleed',
+'anosmia', 'loss of smell', 'ageusia', 'loss of taste',
+'photophobia', 'sensitivity to light', 'phonophobia', 'sensitivity to sound',
+'hyperacusis', 'diplopia', 'double vision', 'scotoma', 'blind spot',
+'ataxia', 'uncoordinated', 'apraxia', 'aphasia', 'difficulty speaking',
+'dysarthria', 'slurred', 'dysphonia', 'hoarseness', 'stridor',
+'wheezing', 'crackles', 'rales', 'rhonchi', 'hematuria', 'blood in urine',
+'proteinuria', 'foamy urine', 'polyuria', 'frequent urination',
+'polydipsia', 'excessive thirst', 'polyphagia', 'excessive hunger',
+'dysuria', 'painful urination', 'oliguria', 'anuria', 'nocturia',
+'incontinence', 'leakage', 'urgency', 'frequency', 'hesitancy',
+'retention', 'dribbling', 'hemorrhoids', 'anal fissure', 'pruritus ani',
+'dyspareunia', 'painful intercourse', 'vaginismus', 'erectile dysfunction',
+'ed', 'impotence', 'priapism', 'gynecomastia', 'galactorrhea', 'sleep apnea', 'narcolepsy', 'restless leg', 'restless legs',
+'reynaud', 'raynaud', 'sjogren', 'sjogren\'s', 'polymyalgia',
+'temporal arteritis', 'giant cell arteritis', 'sarcoidosis',
+'pots', 'postural orthostatic', 'dysautonomia', 'ehlers danlos',
+'eds', 'hypermobility', 'mast cell', 'histamine intolerance',
+'pcos', 'polycystic ovary', 'endometriosis', 'adenomyosis',
+'interstitial cystitis', 'vulvodynia', 'vaginitis', 'balanitis',
+'prostatitis', 'epididymitis', 'orchitis', 'hydrocele', 'varicocele',
+'gastritis', 'gastroparesis', 'diverticulitis', 'diverticulosis',
+'appendicitis', 'peritonitis', 'cellulitis', 'impetigo', 'folliculitis',
+'carbuncle', 'furuncle', 'lymphadenitis', 'lymphangitis', 'vasculitis',
+'pericarditis', 'endocarditis', 'myocarditis', 'atherosclerosis',
+'arteriosclerosis', 'claudication', 'aneurysm', 'deep vein thrombosis',
+'dvt', 'pulmonary embolism', 'pe', 'chronic kidney', 'ckd', 'glomerulonephritis',
+'pyelonephritis', 'hydronephrosis', 'nephrotic', 'nephritic',
+'cirrhosis', 'ascites', 'hepatitis', 'pancreatitis', 'gallstones',
+'cholecystitis', 'choledocholithiasis', 'hypoglycemia', 'hyperglycemia', 'typhoid', 'typhoid fever', 'paratyphoid', 'typhus', 'leprosy',
+'chikungunya', 'zika', 'west nile', 'ebola', 'marburg', 'lassa fever',
+'hantavirus', 'nipah', 'campylobacter', 'salmonella', 'shigella',
+'e. coli', 'coli infection', 'c. diff', 'clostridium', 'botulism',
+'tetanus', 'lockjaw', 'pertussis', 'whooping cough', 'diphtheria',
+'polio', 'poliomyelitis', 'legionnaires', 'legionella', 'lyme disease',
+'rocky mountain spotted fever', 'leptospirosis', 'brucellosis',
+'tularemia', 'q fever', 'psittacosis', 'toxoplasmosis', 'toxocariasis',
+'trichinosis', 'giardia', 'cryptosporidium', 'hookworm', 'pinworm',
+'ascariasis', 'strongyloides', 'schistosomiasis', 'filariasis',
+'onchocerciasis', 'river blindness', 'trachoma', 'scurvy', 'adhd', 'add', 'autism', 'autistic', 'asperger', 'dyslexia', 'dyspraxia',
+'borderline', 'bpd', 'narcissism', 'narcissistic', 'histrionic', 
+'schizoaffective', 'delirium', 'hypochondria', 'hypochondriac',
+'health anxiety', 'social anxiety', 'agoraphobia', 'claustrophobia',
+'phobia', 'panic attack', 'seasonal affective', 'sad', 'postpartum depression',
+'pmdd', 'premenstrual dysphoric', 'compulsion', 'compulsive',
+'impulse control', 'intermittent explosive', 'oppositional defiant',
+'conduct disorder', 'dissociative', 'depersonalization', 'derealization',
+'psychosomatic', 'somatization', 'conversion disorder',
+'factitious', 'munchausen', 'malingering', 'adjustment disorder',
+'bereavement', 'complicated grief', 'burnout', 'compassion fatigue',
+ 
     // Mental & Emotional Health
     'mental', 'emotional', 'psychological', 'psychiatric', 'therapy',
     'counseling', 'psychologist', 'psychiatrist', 'therapist', 'counselor',
@@ -765,89 +1096,9 @@ async function sendMessage() {
         content: message
     });
     
-    // Show typing indicator
-    showTypingIndicator();
-    if (statusText) statusText.textContent = "Dr. GenZ is analyzing your symptoms...";
-    if (sendBtn) sendBtn.disabled = true;
-    
-    try {
-        // Update system message with current specialty
-        conversationHistoryData[0] = createSystemMessage();
-        
-        // Call Groq API
-        const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
-        const API_KEY = "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";
-        
-        const response = await fetch(GROQ_API_URL, {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${API_KEY}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                messages: conversationHistoryData,
-                model: "openai/gpt-oss-120b",
-                temperature: 0.7,
-                max_tokens: 1024,
-                stream: false
-            })
-        });
-        
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`API error: ${response.status} - ${errorText}`);
-        }
-        
-        const data = await response.json();
-        
-        // Extract the generated text from the response
-        let botResponse = "I'm having trouble processing your request right now. Could you please rephrase your question?";
-        if (data && data.choices && data.choices[0] && data.choices[0].message) {
-            botResponse = data.choices[0].message.content;
-            
-            // Add to conversation history
-            conversationHistoryData.push({
-                role: "assistant",
-                content: botResponse
-            });
-            
-            // Limit conversation history to prevent token overflow
-            if (conversationHistoryData.length > 12) {
-                conversationHistoryData = [
-                    conversationHistoryData[0], // Keep system message
-                    ...conversationHistoryData.slice(-10) // Keep last 10 exchanges
-                ];
-            }
-        }
-        
-        // Add bot response to chat
-        addMessage(botResponse);
-        
-        // Speak the response if enabled
-        if (isSpeechEnabled) {
-            speakResponse(botResponse);
-        } else {
-            if (statusText) statusText.textContent = "Waiting for your response";
-            hideTypingIndicator();
-            if (sendBtn) sendBtn.disabled = false;
-        }
-        
-    } catch (error) {
-        console.error("Error:", error);
-        hideTypingIndicator();
-        
-        // Fallback response if API fails
-        const fallbackResponses = [
-            "I'm experiencing technical difficulties right now. Please try again in a moment.",
-            "There seems to be a connection issue. Let's try that again.",
-            "I apologize, but I'm having trouble processing your request. Could you please rephrase your question?"
-        ];
-        
-        const randomResponse = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
-        addMessage(randomResponse);
-        if (statusText) statusText.textContent = "Connection issue - please try again";
-        if (sendBtn) sendBtn.disabled = false;
-    }
+    // ---- NEW: call streaming function ----
+    await streamBotResponse(message);
+    // The streaming function will handle typing indicator, API call, and updating the UI.
 }
 
 function startNewChat() {
