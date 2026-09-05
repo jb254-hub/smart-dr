@@ -495,7 +495,7 @@ async function streamBotResponse(userMessage) {
             },
             body: JSON.stringify({
                 messages: conversationHistoryData,
-                model: "openai/gpt-oss-120b",
+                model: "",
                 temperature: 0.7,
                 max_tokens: 1024,
                 stream: true   // ENABLE STREAMING
