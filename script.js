@@ -484,8 +484,8 @@ async function streamBotResponse(userMessage) {
         // Update system message with current specialty
         conversationHistoryData[0] = createSystemMessage();
         
-        const GROQ_API_URL = "https://exegesis-api.onrender.com/v1/chat/completions";
-        const API_KEY = "ex-bHmEzi4LYWzISU23nrxvsLc1tOa1m4ytSz-VAuEJ25k";
+        const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
+        const API_KEY = "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";
         
         const response = await fetch(GROQ_API_URL, {
             method: "POST",
@@ -495,7 +495,7 @@ async function streamBotResponse(userMessage) {
             },
             body: JSON.stringify({
                 messages: conversationHistoryData,
-                model: "",
+                model: "openai/gpt-oss-120b",
                 temperature: 0.7,
                 max_tokens: 1024,
                 stream: true   // ENABLE STREAMING
@@ -599,8 +599,8 @@ async function streamBotResponse(userMessage) {
 // ============================================
 async function sendMessageFallback(userMessage) {
     try {
-        const GROQ_API_URL = "https://exegesis-api.onrender.com/v1/chat/completions";
-        const API_KEY = "ex-bHmEzi4LYWzISU23nrxvsLc1tOa1m4ytSz-VAuEJ25k";
+        const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
+        const API_KEY = "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";
         const response = await fetch(GROQ_API_URL, {
             method: "POST",
             headers: {
