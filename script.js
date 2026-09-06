@@ -498,11 +498,18 @@ const response = await fetch(EXEGESIS_API_URL, {
         "Accept": "text/event-stream"
     },
     body: JSON.stringify({
-    messages: conversationHistoryData,
-    temperature: 0.7,
-    max_tokens: 1024,
-    stream: true
-})
+        messages: conversationHistoryData,
+
+        // Exegesis model
+        model: "Exegesis Version 1",
+
+        temperature: 0.7,
+        max_tokens: 1024,
+
+        // Enable streaming
+        stream: true
+    })
+});
         
         if (!response.ok) {
             const errorText = await response.text();
