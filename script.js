@@ -482,34 +482,25 @@ async function streamBotResponse(userMessage) {
     
     try {
         // Update system message with current specialty
-conversationHistoryData[0] = createSystemMessage();
-
-const EXEGESIS_API_URL =
-    "https://exegesis-api.onrender.com/v1/chat/completions";
-
-const API_KEY =
-    "ex-bHmEzi4LYWzISU23nrxvsLc1tOa1m4ytSz-VAuEJ25k";
-
-const response = await fetch(EXEGESIS_API_URL, {
-    method: "POST",
-    headers: {
-        "Authorization": `Bearer ${API_KEY}`,
-        "Content-Type": "application/json",
-        "Accept": "text/event-stream"
-    },
-    body: JSON.stringify({
-        messages: conversationHistoryData,
-
-        // Exegesis model
-        model: "Exegesis Version 1",
-
-        temperature: 0.7,
-        max_tokens: 1024,
-
-        // Enable streaming
-        stream: true
-    })
-});
+        conversationHistoryData[0] = createSystemMessage();
+        
+        const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
+        const API_KEY = "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";
+        
+        const response = await fetch(GROQ_API_URL, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${API_KEY}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                messages: conversationHistoryData,
+                model: "openai/gpt-oss-120b",
+                temperature: 0.7,
+                max_tokens: 1024,
+                stream: true   // ENABLE STREAMING
+            })
+        });
         
         if (!response.ok) {
             const errorText = await response.text();
