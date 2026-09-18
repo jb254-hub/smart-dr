@@ -600,7 +600,7 @@ async function streamBotResponse(userMessage) {
 async function sendMessageFallback(userMessage) {
     try {
         const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
-        const API_KEY = "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";
+        const API_KEY = "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";
         const response = await fetch(GROQ_API_URL, {
             method: "POST",
             headers: {
