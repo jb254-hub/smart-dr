@@ -485,7 +485,7 @@ async function streamBotResponse(userMessage) {
         conversationHistoryData[0] = createSystemMessage();
         
         const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
-        const API_KEY = "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";
+        const API_KEY = "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";
         
         const response = await fetch(GROQ_API_URL, {
             method: "POST",
